@@ -49,6 +49,9 @@ public final class NBSSong implements Iterable<NBSTick> {
 		if (song.size() >= Short.MAX_VALUE) {
 			throw new IllegalStateException("Too many ticks!");
 		}
+		while(index >= song.size()) {
+			song.add(new NBSTick(layers));
+		}
 		song.add(index, tick);
 		modCount++;
 	}
@@ -112,6 +115,8 @@ public final class NBSSong implements Iterable<NBSTick> {
 	 */
 	public void play(IBlockPlayer bp, NBSHeader header) {
 		for (NBSTick tick : this) {
+			if (tick == null)
+				continue;
 			float tempo = header.getTempo() / 100;
 			bp.play(tick);
 			try {
@@ -126,7 +131,7 @@ public final class NBSSong implements Iterable<NBSTick> {
 		NBSSong newSong = new NBSSong((short) song.size(), layers);
 		int x = 0;
 		for (NBSTick t : this) {
-			newSong.addTick(x, t);
+			newSong.addTick(x, t.copy());
 			x++;
 		}
 		return newSong;
