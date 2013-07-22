@@ -13,9 +13,8 @@ public class NBSInputStream extends InputStream {
 		this.is = is;
 		header = new NBSHeader(readShort(), readShort(), readString(),
 				readString(), readString(), readString(), readShort(),
-				read() == 1 ? true : false, (byte) read(), (byte) read(),
-				readInt(), readInt(), readInt(), readInt(), readInt(),
-				readString());
+				readByte() == 1, readByte(), readByte(), readInt(), readInt(),
+				readInt(), readInt(), readInt(), readString());
 		song = new NBSSong(header.getTicks(), header.getLayers());
 		short tick = -1;
 		short jumps = 0;
@@ -34,40 +33,54 @@ public class NBSInputStream extends InputStream {
 					break;
 				}
 				layer += jumps;
-				byte inst = (byte) read();
-				byte key = (byte) read();
+				byte inst = readByte();
+				byte key = readByte();
 				t.setNote(new NBSBlock(inst, key), layer);
 			}
+		}
+		if (available() == 0)
+			return;
+		for (short i = 0; i < header.getLayers(); i++) {
+			song.setLayerName(i, readString());
+			song.setLayerVolume(i, readByte());
+		}
+		if (available() == 0)
+			return;
+		byte count = readByte();
+		for (byte i = 0; i < count; i++) {
+			// TODO add custom instrument support
+			String name = readString();
+			String file = readString();
+			byte pitch = readByte();
+			boolean play = readByte() == 1;
 		}
 	}
 
 	@Override
 	public int read() throws IOException {
+		return readByte();
+	}
+
+	protected byte readByte() throws IOException {
 		if (is == null) {
 			throw new IOException();
 		}
-		return is.read();
+		int i = is.read();
+		if (i == -1)
+			throw new IOException();
+		return (byte) i;
 	}
 
 	protected short readShort() throws IOException {
-		if (is == null) {
-			throw new IOException();
-		}
-		return (short) (is.read() | is.read() * 256);
+		return (short) (readByte() | readByte() * 256);
 	}
 
 	protected int readInt() throws IOException {
-		if (is == null) {
-			throw new IOException();
-		}
-		return is.read() | is.read() * 256 | is.read() * 65536 | is.read()
+		return readByte() | readByte() * 256 | readByte() * 65536 | readByte()
 				* 16777216;
 	}
 
 	protected String readString() throws IOException {
-		if (is == null) {
-			throw new IOException();
-		}
 		byte[] b = new byte[readInt()];
 		if (is.read(b) != b.length) {
 			throw new IndexOutOfBoundsException("EOF reached");
@@ -83,8 +96,14 @@ public class NBSInputStream extends InputStream {
 		return song.copy();
 	}
 
+	@Override
 	public void close() {
 		is = null;
+	}
+
+	@Override
+	public int available() throws IOException {
+		return is.available();
 	}
 
 }
