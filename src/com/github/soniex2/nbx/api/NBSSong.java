@@ -101,6 +101,27 @@ public final class NBSSong implements Iterable<NBSTick> {
 		layerVolumes[layer] = volume;
 	}
 
+	/**
+	 * Plays this song.
+	 * 
+	 * @param bp
+	 *            the instance of IBlockPlayer to be used for playing
+	 *            {@link NBSBlock NBSBlocks}
+	 * @param header
+	 *            the {@link NBSHeader} to get the tempo from
+	 */
+	public void play(IBlockPlayer bp, NBSHeader header) {
+		for (NBSTick tick : this) {
+			float tempo = header.getTempo() / 100;
+			bp.play(tick);
+			try {
+				Thread.sleep((long) ((1.0F / tempo) * 1000));
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
 	@Override
 	public Iterator<NBSTick> iterator() {
 		return new Iterator<NBSTick>() {
