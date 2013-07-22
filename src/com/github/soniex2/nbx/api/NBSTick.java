@@ -22,6 +22,8 @@ public final class NBSTick implements Iterable<NBSBlock> {
 	}
 
 	public void setNote(NBSBlock note, int layer) {
+		if (layer >= notes.length)
+			resize((short) layer);
 		notes[layer] = note;
 		modCount++;
 	}
@@ -57,7 +59,7 @@ public final class NBSTick implements Iterable<NBSBlock> {
 		}
 		return s;
 	}
-	
+
 	public NBSTick copy() {
 		NBSTick t = new NBSTick(notes.length);
 		int x = 0;

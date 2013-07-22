@@ -39,9 +39,10 @@ public final class NBSSong implements Iterable<NBSTick> {
 	}
 
 	public void addTick(int index, NBSTick tick) {
-		if (tick.getLayers() != layers) {
-			throw new IllegalArgumentException(
-					"Tick layer count doesn't match song layer count");
+		if (tick.getLayers() < layers) {
+			tick.resize(layers);
+		} else if (tick.getLayers() > layers) {
+			resize(tick.getLayers());
 		}
 		if (index > Short.MAX_VALUE) {
 			throw new IllegalArgumentException("Too many ticks!");
