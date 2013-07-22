@@ -1,5 +1,6 @@
 package com.github.soniex2.nbx.api;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -63,11 +64,11 @@ public class NBSInputStream extends InputStream {
 
 	protected byte readByte() throws IOException {
 		if (is == null) {
-			throw new IOException();
+			throw new NullPointerException();
 		}
 		int i = is.read();
 		if (i == -1)
-			throw new IOException();
+			throw new EOFException();
 		return (byte) i;
 	}
 
@@ -83,7 +84,7 @@ public class NBSInputStream extends InputStream {
 	protected String readString() throws IOException {
 		byte[] b = new byte[readInt()];
 		if (is.read(b) != b.length) {
-			throw new IndexOutOfBoundsException("EOF reached");
+			throw new EOFException();
 		}
 		return new String(b, "US-ASCII");
 	}
