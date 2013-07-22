@@ -13,6 +13,7 @@ public final class NBSSong implements Iterable<NBSTick> {
 	private String[] layerNames;
 	private byte[] layerVolumes;
 	private int modCount = 0;
+	private short pointer = 0;
 
 	public NBSSong(short layers) {
 		this.layers = layers;
@@ -50,7 +51,7 @@ public final class NBSSong implements Iterable<NBSTick> {
 		if (song.size() >= Short.MAX_VALUE) {
 			throw new IllegalStateException("Too many ticks!");
 		}
-		while(index >= song.size()) {
+		while (index >= song.size()) {
 			song.add(new NBSTick(layers));
 		}
 		song.add(index, tick);
@@ -85,6 +86,10 @@ public final class NBSSong implements Iterable<NBSTick> {
 	public NBSTick getTick(short index) {
 		return song.get(index);
 	}
+	
+	public NBSTick getCurrentTick() {
+		return song.get(pointer);
+	}
 
 	public String getLayerName(short layer) {
 		return layerNames[layer];
@@ -115,7 +120,8 @@ public final class NBSSong implements Iterable<NBSTick> {
 	 *            the {@link NBSHeader} to get the tempo from
 	 */
 	public void play(IBlockPlayer bp, NBSHeader header) {
-		for (NBSTick tick : this) {
+		for (; pointer < this.getTicks(); pointer++) {
+			NBSTick tick = this.getTick(pointer);
 			if (tick == null)
 				continue;
 			float tempo = header.getTempo() / 100;
@@ -126,6 +132,16 @@ public final class NBSSong implements Iterable<NBSTick> {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	public void movePointer(short tick) {
+		if (tick < 0 || tick >= song.size())
+			throw new IllegalArgumentException("Invalid position");
+		pointer = tick;
+	}
+	
+	public short getPointer() {
+		return pointer;
 	}
 
 	public NBSSong copy() {
