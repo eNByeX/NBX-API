@@ -57,6 +57,16 @@ public final class NBSTick implements Iterable<NBSBlock> {
 		}
 		return s;
 	}
+	
+	public NBSTick copy() {
+		NBSTick t = new NBSTick(notes.length);
+		int x = 0;
+		for (NBSBlock note : this) {
+			t.setNote(note, x);
+			x++;
+		}
+		return t;
+	}
 
 	@Override
 	public Iterator<NBSBlock> iterator() {

@@ -122,6 +122,16 @@ public final class NBSSong implements Iterable<NBSTick> {
 		}
 	}
 
+	public NBSSong copy() {
+		NBSSong newSong = new NBSSong((short) song.size(), layers);
+		int x = 0;
+		for (NBSTick t : this) {
+			newSong.addTick(x, t);
+			x++;
+		}
+		return newSong;
+	}
+
 	@Override
 	public Iterator<NBSTick> iterator() {
 		return new Iterator<NBSTick>() {
