@@ -33,6 +33,22 @@ public final class NBSSong implements Iterable<NBSTick> {
 		return (short) song.size();
 	}
 
+	public String getLength(NBSHeader header) {
+		double x = (double) getTicks() / ((double) header.getTempo() / 100.0);
+		x -= 1.0 / ((double) header.getTempo() / 100.0);
+		x *= 1000.0;
+		int ms = (int) x % 1000;
+		x /= 1000.0;
+		int s = (int) x % 60;
+		x /= 60.0;
+		int m = (int) x % 60;
+		x /= 60.0;
+		int h = (int) x;
+		return (h < 10 ? "0" : "") + h + ":" + (m < 10 ? "0" : "") + m + ":"
+				+ (s < 10 ? "0" : "") + s + ";"
+				+ (ms < 100 ? ms < 10 ? "00" : "0" : "") + ms;
+	}
+
 	public short getLayers() {
 		return layers;
 	}
@@ -94,7 +110,7 @@ public final class NBSSong implements Iterable<NBSTick> {
 	public NBSTick getTick(short index) {
 		return song.get(index);
 	}
-	
+
 	public NBSTick getCurrentTick() {
 		return song.get(pointer);
 	}
@@ -147,7 +163,7 @@ public final class NBSSong implements Iterable<NBSTick> {
 			throw new IllegalArgumentException("Invalid position");
 		pointer = tick;
 	}
-	
+
 	public short getPointer() {
 		return pointer;
 	}
