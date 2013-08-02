@@ -21,7 +21,7 @@ public final class NBSSong implements Iterable<NBSTick> {
 		this.layers = layers;
 		layerNames = new String[layers];
 		layerVolumes = new byte[layers];
-		Arrays.fill(layerVolumes, (byte) 64);
+		Arrays.fill(layerVolumes, (byte) 100);
 	}
 
 	public NBSSong(short ticks, short layers) {
