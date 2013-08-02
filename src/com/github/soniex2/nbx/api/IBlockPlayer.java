@@ -1,5 +1,8 @@
 package com.github.soniex2.nbx.api;
 
+import com.github.soniex2.nbx.api.nbs.NBSBlock;
+import com.github.soniex2.nbx.api.nbs.NBSTick;
+
 public interface IBlockPlayer {
 
 	/**

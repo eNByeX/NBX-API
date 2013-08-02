@@ -1,0 +1,71 @@
+package com.github.soniex2.nbx.api.stream;
+
+import java.io.IOException;
+import java.io.InputStream;
+
+import com.github.soniex2.nbx.api.nbs.NBSBlock;
+import com.github.soniex2.nbx.api.nbs.NBSHeader;
+import com.github.soniex2.nbx.api.nbs.NBSSong;
+import com.github.soniex2.nbx.api.nbs.NBSTick;
+
+public class NBSInputStream extends LittleEndianDataInputStream {
+
+	private NBSHeader header;
+	private NBSSong song;
+
+	public NBSInputStream(InputStream is) throws IOException {
+		super(is);
+		header = new NBSHeader(readShort(), readShort(), readASCII(),
+				readASCII(), readASCII(), readASCII(), readShort(),
+				readBoolean(), readByte(), readByte(), readInt(), readInt(),
+				readInt(), readInt(), readInt(), readASCII());
+		song = new NBSSong(header.getTicks(), header.getLayers());
+		short tick = -1;
+		short jumps = 0;
+		while (true) {
+			jumps = readShort();
+			if (jumps == 0) {
+				break;
+			}
+			tick += jumps;
+			short layer = -1;
+			NBSTick t = new NBSTick(header.getLayers());
+			song.addTick(tick, t);
+			while (true) {
+				jumps = readShort();
+				if (jumps == 0) {
+					break;
+				}
+				layer += jumps;
+				byte inst = readByte();
+				byte key = readByte();
+				t.setNote(new NBSBlock(inst, key), layer);
+			}
+		}
+		if (available() == 0)
+			return;
+		for (short i = 0; i < header.getLayers(); i++) {
+			song.setLayerName(i, readASCII());
+			song.setLayerVolume(i, readByte());
+		}
+		if (available() == 0)
+			return;
+		byte count = readByte();
+		for (byte i = 0; i < count; i++) {
+			// TODO add custom instrument support
+			String name = readASCII();
+			String file = readASCII();
+			byte pitch = readByte();
+			boolean play = readByte() == 1;
+		}
+	}
+
+	public NBSHeader getHeader() {
+		return header.copy();
+	}
+
+	public NBSSong getSong() {
+		return song.copy();
+	}
+
+}

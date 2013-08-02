@@ -1,10 +1,12 @@
-package com.github.soniex2.nbx.api;
+package com.github.soniex2.nbx.api.nbs;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+
+import com.github.soniex2.nbx.api.IBlockPlayer;
 
 public final class NBSSong implements Iterable<NBSTick> {
 

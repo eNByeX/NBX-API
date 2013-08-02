@@ -1,17 +1,26 @@
-package com.github.soniex2.nbx.api;
+package com.github.soniex2.nbx.api.stream;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 
-public class NBSOutputStream extends ByteArrayOutputStream {
+import com.github.soniex2.nbx.api.nbs.NBSBlock;
+import com.github.soniex2.nbx.api.nbs.NBSHeader;
+import com.github.soniex2.nbx.api.nbs.NBSSong;
+import com.github.soniex2.nbx.api.nbs.NBSTick;
 
-	public NBSOutputStream(NBSHeader header) throws IOException {
+public class NBSOutputStream extends LittleEndianDataOutputStream {
+
+	public NBSOutputStream(OutputStream os) throws IOException {
+		super(os);
+	}
+	
+	public void writeHeader(NBSHeader header) throws IOException {
 		writeShort(header.getTicks());
 		writeShort(header.getLayers());
-		writeString(header.getName());
-		writeString(header.getAuthor());
-		writeString(header.getOriginalAuthor());
-		writeString(header.getDescription());
+		writeASCII(header.getName());
+		writeASCII(header.getAuthor());
+		writeASCII(header.getOriginalAuthor());
+		writeASCII(header.getDescription());
 		writeShort(header.getTempo());
 		write(header.shouldAutosave() ? 1 : 0);
 		write(header.getAutosaveTime());
@@ -21,25 +30,7 @@ public class NBSOutputStream extends ByteArrayOutputStream {
 		writeInt(header.getRClicks());
 		writeInt(header.getBlockAdds());
 		writeInt(header.getBlockBreaks());
-		writeString(header.getImportName());
-	}
-
-	protected void writeInt(int i) throws IOException {
-		write(i & 0xFF);
-		write((i >>> 8) & 0xFF);
-		write((i >>> 16) & 0xFF);
-		write((i >>> 24) & 0xFF);
-	}
-
-	protected void writeShort(int s) throws IOException {
-		write(s & 0xFF);
-		write((s >>> 8) & 0xFF);
-	}
-
-	protected void writeString(String s) throws IOException {
-		byte[] data = s.getBytes("US-ASCII");
-		writeInt(data.length);
-		write(data);
+		writeASCII(header.getImportName());
 	}
 
 	public void writeSong(NBSSong song) throws IOException {
@@ -66,7 +57,7 @@ public class NBSOutputStream extends ByteArrayOutputStream {
 		}
 		writeShort(0);
 		for (short x = 0; x < song.getLayers(); x++) {
-			writeString(String.valueOf(song.getLayerName(x)));
+			writeASCII(String.valueOf(song.getLayerName(x)));
 			write(song.getLayerVolume(x));
 		}
 		write(0);

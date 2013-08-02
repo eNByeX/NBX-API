@@ -1,15 +1,21 @@
-package com.github.soniex2.nbx.api;
+package com.github.soniex2.nbx.api.stream;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FilterOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.zip.CRC32;
 
-public class NBXOutputStream extends ByteArrayOutputStream {
+import com.github.soniex2.nbx.api.nbs.NBSHeader;
+import com.github.soniex2.nbx.api.nbs.NBSSong;
+
+public class NBXOutputStream extends FilterOutputStream {
 
 	private static final byte[] FILE_HEADER = new byte[] { -0x7F, 'N', 'B',
 			'X', 0x0D, 0x0A, 0x1A, 0x0A };
 
-	public NBXOutputStream() throws IOException {
+	public NBXOutputStream(OutputStream os) throws IOException {
+		super(os);
 		write(FILE_HEADER);
 	}
 
@@ -85,9 +91,11 @@ public class NBXOutputStream extends ByteArrayOutputStream {
 	 */
 	public void writeSong(NBSHeader header, NBSSong song, boolean end)
 			throws IOException {
-		NBSOutputStream os = new NBSOutputStream(header);
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		NBSOutputStream os = new NBSOutputStream(baos);
+		os.writeHeader(header);
 		os.writeSong(song);
-		writeChunk("SDAT", os.toByteArray());
+		writeChunk("SDAT", baos.toByteArray());
 		os.close();
 		if (end)
 			writeChunk("SEND", new byte[0]);

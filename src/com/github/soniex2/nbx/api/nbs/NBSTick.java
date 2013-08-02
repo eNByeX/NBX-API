@@ -1,4 +1,4 @@
-package com.github.soniex2.nbx.api;
+package com.github.soniex2.nbx.api.nbs;
 
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;

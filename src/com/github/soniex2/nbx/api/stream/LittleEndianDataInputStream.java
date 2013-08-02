@@ -1,62 +1,18 @@
-package com.github.soniex2.nbx.api;
+package com.github.soniex2.nbx.api.stream;
 
 import java.io.DataInput;
 import java.io.EOFException;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PushbackInputStream;
 import java.io.UTFDataFormatException;
 
-public class NBSInputStream extends FilterInputStream implements DataInput {
+class LittleEndianDataInputStream extends FilterInputStream implements
+		DataInput {
 
-	private NBSHeader header;
-	private NBSSong song;
-
-	public NBSInputStream(InputStream is) throws IOException {
-		super(is);
-		header = new NBSHeader(readShort(), readShort(), readASCII(),
-				readASCII(), readASCII(), readASCII(), readShort(),
-				readBoolean(), readByte(), readByte(), readInt(), readInt(),
-				readInt(), readInt(), readInt(), readASCII());
-		song = new NBSSong(header.getTicks(), header.getLayers());
-		short tick = -1;
-		short jumps = 0;
-		while (true) {
-			jumps = readShort();
-			if (jumps == 0) {
-				break;
-			}
-			tick += jumps;
-			short layer = -1;
-			NBSTick t = new NBSTick(header.getLayers());
-			song.addTick(tick, t);
-			while (true) {
-				jumps = readShort();
-				if (jumps == 0) {
-					break;
-				}
-				layer += jumps;
-				byte inst = readByte();
-				byte key = readByte();
-				t.setNote(new NBSBlock(inst, key), layer);
-			}
-		}
-		if (available() == 0)
-			return;
-		for (short i = 0; i < header.getLayers(); i++) {
-			song.setLayerName(i, readASCII());
-			song.setLayerVolume(i, readByte());
-		}
-		if (available() == 0)
-			return;
-		byte count = readByte();
-		for (byte i = 0; i < count; i++) {
-			// TODO add custom instrument support
-			String name = readASCII();
-			String file = readASCII();
-			byte pitch = readByte();
-			boolean play = readByte() == 1;
-		}
+	protected LittleEndianDataInputStream(InputStream in) {
+		super(in);
 	}
 
 	@Override
@@ -223,14 +179,6 @@ public class NBSInputStream extends FilterInputStream implements DataInput {
 		return new String(b, "US-ASCII");
 	}
 
-	public NBSHeader getHeader() {
-		return header.copy();
-	}
-
-	public NBSSong getSong() {
-		return song.copy();
-	}
-
 	@Override
 	public void readFully(byte[] b) throws IOException {
 		readFully(b, 0, b.length);
@@ -269,17 +217,78 @@ public class NBSInputStream extends FilterInputStream implements DataInput {
 		return Double.longBitsToDouble(readLong());
 	}
 
+	private char lineBuffer[];
+
 	/**
-	 * This method throws an IOException, you shouldn't try to read a text line
-	 * from a NBS file...
+	 * See the general contract of the <code>readLine</code> method of
+	 * <code>DataInput</code>.
+	 * <p>
+	 * Bytes for this operation are read from the contained input stream.
 	 * 
-	 * @return never returns.
+	 * @deprecated This method does not properly convert bytes to characters. As
+	 *             of JDK&nbsp;1.1, the preferred way to read lines of text is
+	 *             via the <code>BufferedReader.readLine()</code> method.
+	 *             Programs that use the <code>LittleEndianDataInputStream</code> class to
+	 *             read lines can be converted to use the
+	 *             <code>BufferedReader</code> class by replacing code of the
+	 *             form: <blockquote>
+	 * 
+	 *             <pre>
+	 * LittleEndianDataInputStream d = new LittleEndianDataInputStream(in);
+	 * </pre>
+	 * 
+	 *             </blockquote> with: <blockquote>
+	 * 
+	 *             <pre>
+	 * BufferedReader d = new BufferedReader(new InputStreamReader(in));
+	 * </pre>
+	 * 
+	 *             </blockquote>
+	 * 
+	 * @return the next line of text from this input stream.
 	 * @exception IOException
-	 *                if you call it.
+	 *                if an I/O error occurs.
+	 * @see java.io.BufferedReader#readLine()
+	 * @see java.io.FilterInputStream#in
 	 */
-	@Override
+	@Deprecated
 	public String readLine() throws IOException {
-		throw new IOException();
+		char buf[] = lineBuffer;
+		if (buf == null) {
+			buf = lineBuffer = new char[128];
+		}
+		int room = buf.length;
+		int offset = 0;
+		int c;
+		loop: while (true) {
+			switch (c = in.read()) {
+			case -1:
+			case '\n':
+				break loop;
+			case '\r':
+				int c2 = in.read();
+				if ((c2 != '\n') && (c2 != -1)) {
+					if (!(in instanceof PushbackInputStream)) {
+						this.in = new PushbackInputStream(in);
+					}
+					((PushbackInputStream) in).unread(c2);
+				}
+				break loop;
+			default:
+				if (--room < 0) {
+					buf = new char[offset + 128];
+					room = buf.length - offset - 1;
+					System.arraycopy(lineBuffer, 0, buf, 0, offset);
+					lineBuffer = buf;
+				}
+				buf[offset++] = (char) c;
+				break;
+			}
+		}
+		if ((c == -1) && (offset == 0)) {
+			return null;
+		}
+		return String.copyValueOf(buf, 0, offset);
 	}
 
 	private byte bytearr[] = new byte[80];
@@ -287,7 +296,7 @@ public class NBSInputStream extends FilterInputStream implements DataInput {
 
 	@Override
 	public String readUTF() throws IOException {
-		int utflen = readInt();
+		int utflen = readUnsignedShort();
 		byte[] bytearr = null;
 		char[] chararr = null;
 		if (this.bytearr.length < utflen) {
