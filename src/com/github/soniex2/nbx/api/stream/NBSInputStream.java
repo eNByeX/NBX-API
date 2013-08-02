@@ -62,6 +62,9 @@ public class NBSInputStream extends LittleEndianDataInputStream {
 			byte pitch = readByte();
 			boolean play = readByte() == 1;
 		}
+		if (song.getLayers() != header.getLayers()) {
+			header.setLayers(song.getLayers());
+		}
 	}
 
 	public NBSHeader getHeader() {

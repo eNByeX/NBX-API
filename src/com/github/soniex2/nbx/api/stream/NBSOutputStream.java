@@ -13,7 +13,7 @@ public class NBSOutputStream extends LittleEndianDataOutputStream {
 	public NBSOutputStream(OutputStream os) throws IOException {
 		super(os);
 	}
-	
+
 	public void writeHeader(NBSHeader header) throws IOException {
 		writeShort(header.getTicks());
 		writeShort(header.getLayers());
@@ -57,8 +57,10 @@ public class NBSOutputStream extends LittleEndianDataOutputStream {
 		}
 		writeShort(0);
 		for (short x = 0; x < song.getLayers(); x++) {
-			// TODO fix this
-			writeASCII(String.valueOf(song.getLayerName(x)));
+			if (song.getLayerName(x) == null)
+				writeASCII("");
+			else
+				writeASCII(String.valueOf(song.getLayerName(x)));
 			write(song.getLayerVolume(x));
 		}
 		write(0);
