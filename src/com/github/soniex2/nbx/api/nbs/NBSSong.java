@@ -53,7 +53,7 @@ public final class NBSSong implements Iterable<NBSTick> {
 		if (song.size() >= Short.MAX_VALUE) {
 			throw new IllegalStateException("Too many ticks!");
 		}
-		while (index >= song.size()) {
+		while (index > song.size()) {
 			song.add(new NBSTick(layers));
 		}
 		song.add(index, tick);
@@ -70,6 +70,8 @@ public final class NBSSong implements Iterable<NBSTick> {
 			throw new IllegalArgumentException(
 					"Tick must have at least one layer");
 		}
+		if (layers == this.layers)
+			return;
 		Iterator<NBSTick> iterator = song.iterator();
 		while (iterator.hasNext()) {
 			iterator.next().resize(layers);
@@ -81,8 +83,12 @@ public final class NBSSong implements Iterable<NBSTick> {
 		byte[] newLayerVolumes = new byte[layers];
 		System.arraycopy(layerVolumes, 0, newLayerVolumes, 0,
 				layers < layerVolumes.length ? layers : layerVolumes.length);
+		for (int x = layerVolumes.length; x < newLayerVolumes.length; x++) {
+			newLayerVolumes[x] = 100;
+		}
 		layerVolumes = newLayerVolumes;
 		modCount++;
+		this.layers = layers;
 	}
 
 	public NBSTick getTick(short index) {
@@ -152,6 +158,12 @@ public final class NBSSong implements Iterable<NBSTick> {
 		for (NBSTick t : this) {
 			newSong.addTick(x, t.copy());
 			x++;
+		}
+		for (x = 0; x < layerNames.length; x++) {
+			newSong.layerNames[x] = layerNames[x];
+		}
+		for (x = 0; x < layerVolumes.length; x++) {
+			newSong.layerVolumes[x] = layerVolumes[x];
 		}
 		return newSong;
 	}
