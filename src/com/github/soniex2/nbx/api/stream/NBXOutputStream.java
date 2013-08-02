@@ -1,7 +1,6 @@
 package com.github.soniex2.nbx.api.stream;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.zip.CRC32;
@@ -9,7 +8,7 @@ import java.util.zip.CRC32;
 import com.github.soniex2.nbx.api.nbs.NBSHeader;
 import com.github.soniex2.nbx.api.nbs.NBSSong;
 
-public class NBXOutputStream extends FilterOutputStream {
+public class NBXOutputStream extends LittleEndianDataOutputStream {
 
 	private static final byte[] FILE_HEADER = new byte[] { -0x7F, 'N', 'B',
 			'X', 0x0D, 0x0A, 0x1A, 0x0A };
@@ -17,24 +16,6 @@ public class NBXOutputStream extends FilterOutputStream {
 	public NBXOutputStream(OutputStream os) throws IOException {
 		super(os);
 		write(FILE_HEADER);
-	}
-
-	protected void writeInt(int i) throws IOException {
-		write(i & 0xFF);
-		write((i >>> 8) & 0xFF);
-		write((i >>> 16) & 0xFF);
-		write((i >>> 24) & 0xFF);
-	}
-
-	protected void writeShort(int s) throws IOException {
-		write(s & 0xFF);
-		write((s >>> 8) & 0xFF);
-	}
-
-	protected void writeString(String s) throws IOException {
-		byte[] data = s.getBytes("US-ASCII");
-		writeInt(data.length);
-		write(data);
 	}
 
 	/**
