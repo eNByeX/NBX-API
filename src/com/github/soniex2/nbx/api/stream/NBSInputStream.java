@@ -1,5 +1,6 @@
 package com.github.soniex2.nbx.api.stream;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -42,16 +43,19 @@ public class NBSInputStream extends LittleEndianDataInputStream {
 				t.setNote(new NBSBlock(inst, key), layer);
 			}
 		}
-		if (available() == 0)
+		try {
+			for (short i = 0; i < header.getLayers(); i++) {
+				song.setLayerName(i, readASCII());
+				song.setLayerVolume(i, readByte());
+			}
+		} catch (EOFException e) {
 			return;
-		for (short i = 0; i < header.getLayers(); i++) {
-			song.setLayerName(i, readASCII());
-			song.setLayerVolume(i, readByte());
 		}
-		if (available() == 0)
+		int a = read();
+		if (a == -1) {
 			return;
-		byte count = readByte();
-		for (byte i = 0; i < count; i++) {
+		}
+		for (byte i = 0; i < a; i++) {
 			// TODO add custom instrument support
 			String name = readASCII();
 			String file = readASCII();

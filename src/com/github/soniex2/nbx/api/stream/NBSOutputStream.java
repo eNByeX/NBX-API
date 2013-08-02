@@ -57,6 +57,7 @@ public class NBSOutputStream extends LittleEndianDataOutputStream {
 		}
 		writeShort(0);
 		for (short x = 0; x < song.getLayers(); x++) {
+			// TODO fix this
 			writeASCII(String.valueOf(song.getLayerName(x)));
 			write(song.getLayerVolume(x));
 		}
