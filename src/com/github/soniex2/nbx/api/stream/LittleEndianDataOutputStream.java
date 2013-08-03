@@ -1,18 +1,18 @@
 package com.github.soniex2.nbx.api.stream;
 
+import java.io.BufferedOutputStream;
 import java.io.DataOutput;
-import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UTFDataFormatException;
 
-class LittleEndianDataOutputStream extends FilterOutputStream implements
+class LittleEndianDataOutputStream extends BufferedOutputStream implements
 		DataOutput {
 
 	protected LittleEndianDataOutputStream(OutputStream out) {
 		super(out);
 	}
-	
+
 	public void writeASCII(String s) throws IOException {
 		byte[] data = s.getBytes("US-ASCII");
 		writeInt(data.length);

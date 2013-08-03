@@ -1,14 +1,14 @@
 package com.github.soniex2.nbx.api.stream;
 
+import java.io.BufferedInputStream;
 import java.io.DataInput;
 import java.io.EOFException;
-import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
 import java.io.UTFDataFormatException;
 
-class LittleEndianDataInputStream extends FilterInputStream implements
+class LittleEndianDataInputStream extends BufferedInputStream implements
 		DataInput {
 
 	protected LittleEndianDataInputStream(InputStream in) {
@@ -228,10 +228,10 @@ class LittleEndianDataInputStream extends FilterInputStream implements
 	 * @deprecated This method does not properly convert bytes to characters. As
 	 *             of JDK&nbsp;1.1, the preferred way to read lines of text is
 	 *             via the <code>BufferedReader.readLine()</code> method.
-	 *             Programs that use the <code>LittleEndianDataInputStream</code> class to
-	 *             read lines can be converted to use the
-	 *             <code>BufferedReader</code> class by replacing code of the
-	 *             form: <blockquote>
+	 *             Programs that use the
+	 *             <code>LittleEndianDataInputStream</code> class to read lines
+	 *             can be converted to use the <code>BufferedReader</code> class
+	 *             by replacing code of the form: <blockquote>
 	 * 
 	 *             <pre>
 	 * LittleEndianDataInputStream d = new LittleEndianDataInputStream(in);
