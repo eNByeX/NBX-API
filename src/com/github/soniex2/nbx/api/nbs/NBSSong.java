@@ -15,7 +15,7 @@ public final class NBSSong implements Iterable<NBSTick> {
 	private String[] layerNames;
 	private byte[] layerVolumes;
 	private int modCount = 0;
-	private short pointer = 0;
+	private short marker = 0;
 
 	public NBSSong(short layers) {
 		this.layers = layers;
@@ -112,7 +112,7 @@ public final class NBSSong implements Iterable<NBSTick> {
 	}
 
 	public NBSTick getCurrentTick() {
-		return song.get(pointer);
+		return song.get(marker);
 	}
 
 	public String getLayerName(short layer) {
@@ -144,8 +144,8 @@ public final class NBSSong implements Iterable<NBSTick> {
 	 *            the {@link NBSHeader} to get the tempo from
 	 */
 	public void play(IBlockPlayer bp, NBSHeader header) {
-		for (; pointer < this.getTicks(); pointer++) {
-			NBSTick tick = this.getTick(pointer);
+		for (; marker < this.getTicks(); marker++) {
+			NBSTick tick = this.getTick(marker);
 			if (tick == null)
 				continue;
 			float tempo = header.getTempo() / 100;
@@ -158,14 +158,14 @@ public final class NBSSong implements Iterable<NBSTick> {
 		}
 	}
 
-	public void movePointer(short tick) {
+	public void moveMarker(short tick) {
 		if (tick < 0 || tick >= song.size())
 			throw new IllegalArgumentException("Invalid position");
-		pointer = tick;
+		marker = tick;
 	}
 
-	public short getPointer() {
-		return pointer;
+	public short getMarker() {
+		return marker;
 	}
 
 	public NBSSong copy() {
