@@ -14,12 +14,22 @@ public class NBSInputStream extends LittleEndianDataInputStream {
 	private NBSHeader header;
 	private NBSSong song;
 
-	public NBSInputStream(InputStream is) throws IOException {
+	public NBSInputStream(InputStream is) {
 		super(is);
-		header = new NBSHeader(readShort(), readShort(), readASCII(),
+	}
+
+	public NBSHeader getHeader() throws IOException {
+		if (header != null)
+			return header.copy();
+		return (header = new NBSHeader(readShort(), readShort(), readASCII(),
 				readASCII(), readASCII(), readASCII(), readShort(),
 				readBoolean(), readByte(), readByte(), readInt(), readInt(),
-				readInt(), readInt(), readInt(), readASCII());
+				readInt(), readInt(), readInt(), readASCII())).copy();
+	}
+
+	public NBSSong getSong() throws IOException {
+		if (song != null)
+			return song.copy();
 		song = new NBSSong(header.getTicks(), header.getLayers());
 		short tick = -1;
 		short jumps = 0;
@@ -49,11 +59,11 @@ public class NBSInputStream extends LittleEndianDataInputStream {
 				song.setLayerVolume(i, readByte());
 			}
 		} catch (EOFException e) {
-			return;
+			return song.copy();
 		}
 		int a = read();
 		if (a == -1) {
-			return;
+			return song.copy();
 		}
 		for (byte i = 0; i < a; i++) {
 			// TODO add custom instrument support
@@ -65,13 +75,6 @@ public class NBSInputStream extends LittleEndianDataInputStream {
 		if (song.getLayers() != header.getLayers()) {
 			header.setLayers(song.getLayers());
 		}
-	}
-
-	public NBSHeader getHeader() {
-		return header.copy();
-	}
-
-	public NBSSong getSong() {
 		return song.copy();
 	}
 
