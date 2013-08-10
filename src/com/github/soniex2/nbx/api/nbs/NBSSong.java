@@ -144,11 +144,11 @@ public final class NBSSong implements Iterable<NBSTick> {
 	 *            the {@link NBSHeader} to get the tempo from
 	 */
 	public void play(IBlockPlayer bp, NBSHeader header) {
+		float tempo = header.getTempo() / 100;
 		for (; marker < this.getTicks(); marker++) {
 			NBSTick tick = this.getTick(marker);
 			if (tick == null)
 				continue;
-			float tempo = header.getTempo() / 100;
 			bp.play(tick);
 			try {
 				Thread.sleep((long) ((1.0F / tempo) * 1000));
