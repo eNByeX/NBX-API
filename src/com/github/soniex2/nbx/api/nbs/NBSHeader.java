@@ -175,24 +175,9 @@ public class NBSHeader {
 	}
 
 	public NBSHeader copy() {
-		NBSHeader x = new NBSHeader();
-		x.ticks = ticks;
-		x.layers = layers;
-		x.name = name;
-		x.author = author;
-		x.originalAuthor = originalAuthor;
-		x.description = description;
-		x.tempo = tempo;
-		x.autosave = autosave;
-		x.autosaveTime = autosaveTime;
-		x.timeSig = timeSig;
-		x.minutes = minutes;
-		x.lclicks = lclicks;
-		x.rclicks = rclicks;
-		x.blockAdds = blockAdds;
-		x.blockBreaks = blockBreaks;
-		x.importName = importName;
-		return x;
+		return new NBSHeader(ticks, layers, name, author, originalAuthor,
+				description, tempo, autosave, autosaveTime, timeSig, minutes,
+				lclicks, rclicks, blockAdds, blockBreaks, importName);
 	}
 
 }
