@@ -14,6 +14,11 @@ public class NBSOutputStream extends LittleEndianDataOutputStream {
 		super(os);
 	}
 
+	/**
+	 * Writes a header to the stream.
+	 * @param header the header.
+	 * @throws IOException if an I/O error occurs.
+	 */
 	public void writeHeader(NBSHeader header) throws IOException {
 		writeShort(header.getTicks());
 		writeShort(header.getLayers());
@@ -33,6 +38,11 @@ public class NBSOutputStream extends LittleEndianDataOutputStream {
 		writeASCII(header.getImportName());
 	}
 
+	/**
+	 * Writes a song to the stream.
+	 * @param song the song.
+	 * @throws IOException if an I/O error occurs.
+	 */
 	public void writeSong(NBSSong song) throws IOException {
 		short songTicks = song.getTicks();
 		short lastTick = -1;

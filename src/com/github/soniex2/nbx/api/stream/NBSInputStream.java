@@ -18,6 +18,12 @@ public class NBSInputStream extends LittleEndianDataInputStream {
 		super(is);
 	}
 
+	/**
+	 * Reads a header from the stream.
+	 * @return The header.
+	 * @throws EOFException if this stream reaches the end before reading all the bytes.
+	 * @throws IOException if an I/O error occurs.
+	 */
 	public NBSHeader getHeader() throws IOException {
 		if (header != null)
 			return header.copy();
@@ -27,6 +33,12 @@ public class NBSInputStream extends LittleEndianDataInputStream {
 				readInt(), readInt(), readInt(), readASCII())).copy();
 	}
 
+	/**
+	 * Reads a song from the stream.
+	 * @return The song.
+	 * @throws EOFException if this stream reaches the end before reading the whole song.
+	 * @throws IOException if an I/O error occurs.
+	 */
 	public NBSSong getSong() throws IOException {
 		if (song != null)
 			return song.copy();
