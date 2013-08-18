@@ -8,10 +8,15 @@ public interface IBlockPlayer {
 	/**
 	 * Plays a NBSBlock.
 	 * @param block the NBSBlock
-	 * @return the thread playing the note
-	 * @throws Throwable 
 	 */
 	public void play(NBSBlock block);
+
+	/**
+	 * Plays a NBSBlock at a given volume.
+	 * @param block the NBSBlock
+	 * @param volume the volume
+	 */
+	public void play(NBSBlock block, float volume);
 
 	/**
 	 * Plays all notes in a NBSTick.
