@@ -149,7 +149,7 @@ public final class NBSSong implements Iterable<NBSTick> {
 			NBSTick tick = this.getTick(marker);
 			if (tick == null)
 				continue;
-			bp.play(tick);
+			bp.play(tick, layerVolumes);
 			try {
 				Thread.sleep((long) ((1.0F / tempo) * 1000));
 			} catch (InterruptedException e) {
