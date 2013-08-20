@@ -153,7 +153,7 @@ public final class NBSSong implements Iterable<NBSTick> {
 			try {
 				Thread.sleep((long) ((1.0F / tempo) * 1000));
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				break;
 			}
 		}
 	}
