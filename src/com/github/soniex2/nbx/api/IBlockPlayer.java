@@ -1,6 +1,8 @@
 package com.github.soniex2.nbx.api;
 
 import com.github.soniex2.nbx.api.nbs.NBSBlock;
+import com.github.soniex2.nbx.api.nbs.NBSHeader;
+import com.github.soniex2.nbx.api.nbs.NBSSong;
 import com.github.soniex2.nbx.api.nbs.NBSTick;
 
 public interface IBlockPlayer {
@@ -60,6 +62,21 @@ public interface IBlockPlayer {
 	 *            a volume array
 	 */
 	public void play(NBSTick tick, float[] volumes);
+
+	/**
+	 * Plays a NBSSong.
+	 * 
+	 * @param song
+	 *            the NBSSong to play
+	 * @param header
+	 *            the NBSHeader to use while playing
+	 * @throws InterruptedException
+	 *             if any thread has interrupted the current thread. The
+	 *             interrupted status of the current thread is cleared when this
+	 *             exception is thrown.
+	 */
+	public void play(NBSSong song, NBSHeader header)
+			throws InterruptedException;
 
 	/**
 	 * Closes this IBlockPlayer.

@@ -137,25 +137,21 @@ public final class NBSSong implements Iterable<NBSTick> {
 	/**
 	 * Plays this song.
 	 * 
+	 * @deprecated use {@link IBlockPlayer#play(NBSSong, NBSHeader)} instead.
 	 * @param bp
 	 *            the instance of IBlockPlayer to be used for playing
 	 *            {@link NBSBlock NBSBlocks}
 	 * @param header
 	 *            the {@link NBSHeader} to get the tempo from
+	 * @throws InterruptedException
+	 *             if any thread has interrupted the current thread. The
+	 *             interrupted status of the current thread is cleared when this
+	 *             exception is thrown.
 	 */
-	public void play(IBlockPlayer bp, NBSHeader header) {
-		float tempo = header.getTempo() / 100;
-		for (; marker < this.getTicks(); marker++) {
-			NBSTick tick = this.getTick(marker);
-			if (tick == null)
-				continue;
-			bp.play(tick, layerVolumes);
-			try {
-				Thread.sleep((long) ((1.0F / tempo) * 1000));
-			} catch (InterruptedException e) {
-				break;
-			}
-		}
+	@Deprecated
+	public void play(IBlockPlayer bp, NBSHeader header)
+			throws InterruptedException {
+		bp.play(this, header);
 	}
 
 	public void moveMarker(short tick) {
