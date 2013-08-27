@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.zip.CRC32;
 
+import com.github.soniex2.nbx.api.INBXChunk;
 import com.github.soniex2.nbx.api.nbs.NBSHeader;
 import com.github.soniex2.nbx.api.nbs.NBSSong;
 
@@ -16,6 +17,18 @@ public class NBXOutputStream extends LittleEndianDataOutputStream {
 	public NBXOutputStream(OutputStream os) throws IOException {
 		super(os);
 		write(FILE_HEADER);
+	}
+
+	/**
+	 * Writes an INBXChunk to the file
+	 * 
+	 * @param chunk
+	 *            the INBXChunk
+	 * @throws IOException
+	 *             if an I/O error occurs.
+	 */
+	public void writeChunk(INBXChunk chunk) throws IOException {
+		writeChunk(chunk.getId(), chunk.getData());
 	}
 
 	/**
