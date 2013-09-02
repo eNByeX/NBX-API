@@ -50,13 +50,12 @@ public final class NBSTick implements Iterable<NBSBlock> {
 
 	@Override
 	public String toString() {
-		String s = "";
+		String s = "[";
 		for (int x = 0; x < notes.length; x++) {
-			if (notes[x] == null)
-				continue;
-			s += "[" + x + "=" + notes[x].getInstrument() + ":"
-					+ notes[x].getNote() + "]";
+			s += String.valueOf(notes[x]) + ", ";
 		}
+		s = s.substring(0, s.length() - 2);
+		s += "]";
 		return s;
 	}
 

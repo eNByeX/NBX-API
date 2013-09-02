@@ -24,4 +24,8 @@ public final class NBSBlock {
 		return note;
 	}
 
+	public String toString() {
+		return note + ":" + inst;
+	}
+
 }
