@@ -23,7 +23,7 @@ public final class NBSTick implements Iterable<NBSBlock> {
 
 	public void setNote(NBSBlock note, int layer) {
 		if (layer >= notes.length)
-			resize((short) (layer+1));
+			resize((short) (layer + 1));
 		notes[layer] = note;
 		modCount++;
 	}
@@ -74,6 +74,7 @@ public final class NBSTick implements Iterable<NBSBlock> {
 		return new Iterator<NBSBlock>() {
 
 			private int cursor = 0;
+			private int last = -1;
 			private int expectedModCount = modCount;
 
 			@Override
@@ -87,6 +88,7 @@ public final class NBSTick implements Iterable<NBSBlock> {
 				try {
 					int i = cursor;
 					NBSBlock next = notes[i];
+					last = i;
 					cursor = i + 1;
 					return next;
 				} catch (IndexOutOfBoundsException e) {
@@ -97,7 +99,16 @@ public final class NBSTick implements Iterable<NBSBlock> {
 
 			@Override
 			public void remove() {
-				throw new UnsupportedOperationException();
+				checkForComodification();
+				try {
+					if (last < 0)
+						throw new IllegalStateException();
+					notes[last] = null;
+					last = -1;
+				} catch (IndexOutOfBoundsException e) {
+					checkForComodification();
+					throw new NoSuchElementException();
+				}
 			}
 
 			public void checkForComodification() {
