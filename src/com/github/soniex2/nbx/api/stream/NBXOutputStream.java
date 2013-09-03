@@ -89,6 +89,7 @@ public class NBXOutputStream extends LittleEndianDataOutputStream {
 		NBSOutputStream os = new NBSOutputStream(baos);
 		os.writeHeader(header);
 		os.writeSong(song);
+		os.flush();
 		writeChunk("SDAT", baos.toByteArray());
 		os.close();
 		if (end)
