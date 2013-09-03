@@ -17,7 +17,7 @@ public final class NBSBlock {
 	}
 
 	public String toString() {
-		return note + ":" + inst;
+		return inst + ":" + note;
 	}
 
 }
