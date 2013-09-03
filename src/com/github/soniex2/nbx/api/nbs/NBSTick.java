@@ -54,7 +54,8 @@ public final class NBSTick implements Iterable<NBSBlock> {
 		for (int x = 0; x < notes.length; x++) {
 			s += String.valueOf(notes[x]) + ", ";
 		}
-		s = s.substring(0, s.length() - 2);
+		if (s.length() > 2)
+			s = s.substring(0, s.length() - 2);
 		s += "]";
 		return s;
 	}
