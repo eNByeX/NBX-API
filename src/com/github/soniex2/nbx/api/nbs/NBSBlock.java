@@ -1,6 +1,6 @@
 package com.github.soniex2.nbx.api.nbs;
 
-public final class NBSBlock {
+public final class NBSBlock implements Comparable<NBSBlock> {
 
 	public final int inst;
 	public final int note;
@@ -18,6 +18,15 @@ public final class NBSBlock {
 
 	public String toString() {
 		return inst + ":" + note;
+	}
+	
+	public int hashCode() {
+		return (inst << 7) | note;
+	}
+
+	@Override
+	public int compareTo(NBSBlock o) {
+		return hashCode() - o.hashCode();
 	}
 
 }
