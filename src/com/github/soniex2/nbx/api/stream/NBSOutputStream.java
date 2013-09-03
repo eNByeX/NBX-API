@@ -59,8 +59,8 @@ public class NBSOutputStream extends LittleEndianDataOutputStream {
 				if (block == null)
 					continue;
 				writeShort(y - lastLayer);
-				write(block.getInstrument());
-				write(block.getNote());
+				write(block.inst);
+				write(block.note);
 				lastLayer = y;
 			}
 			writeShort(0);

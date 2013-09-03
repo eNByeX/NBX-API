@@ -2,8 +2,8 @@ package com.github.soniex2.nbx.api.nbs;
 
 public final class NBSBlock {
 
-	private int inst;
-	private int note;
+	public final int inst;
+	public final int note;
 
 	public NBSBlock(int instrument, int note) {
 		if (note > 87 || note < 0) {
@@ -14,14 +14,6 @@ public final class NBSBlock {
 		}
 		inst = instrument & 0x7F;
 		this.note = note & 0x7F;
-	}
-
-	public int getInstrument() {
-		return inst;
-	}
-
-	public int getNote() {
-		return note;
 	}
 
 	public String toString() {
