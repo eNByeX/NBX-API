@@ -79,6 +79,16 @@ public interface IBlockPlayer {
 			throws InterruptedException;
 
 	/**
+	 * Tests if this block player supports custom instruments.
+	 * 
+	 * @return a <code>boolean</code> indicating if this block player supports
+	 *         the <code>setCustomInstrument</code> method.
+	 */
+	public boolean customInstrumentsSupported();
+
+	public void setCustomInstrument(int id, IInstrument i);
+
+	/**
 	 * Closes this IBlockPlayer.
 	 */
 	public void close();
