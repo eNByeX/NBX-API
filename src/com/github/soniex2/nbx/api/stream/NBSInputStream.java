@@ -6,6 +6,7 @@ import java.io.InputStream;
 
 import com.github.soniex2.nbx.api.nbs.NBSBlock;
 import com.github.soniex2.nbx.api.nbs.NBSHeader;
+import com.github.soniex2.nbx.api.nbs.NBSInstrument;
 import com.github.soniex2.nbx.api.nbs.NBSSong;
 import com.github.soniex2.nbx.api.nbs.NBSTick;
 
@@ -83,6 +84,8 @@ public class NBSInputStream extends LittleEndianDataInputStream {
 			String file = readASCII();
 			byte pitch = readByte();
 			boolean play = readByte() == 1;
+			NBSInstrument inst = new NBSInstrument(name, file, pitch, play);
+			song.setCustomInstrument(i,inst);
 		}
 		if (song.getLayers() != header.getLayers()) {
 			header.setLayers(song.getLayers());

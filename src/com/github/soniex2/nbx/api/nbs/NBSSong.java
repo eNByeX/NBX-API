@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import com.github.soniex2.nbx.api.IBlockPlayer;
+import com.github.soniex2.nbx.api.IInstrument;
 
 public final class NBSSong implements Iterable<NBSTick> {
 
@@ -16,6 +17,7 @@ public final class NBSSong implements Iterable<NBSTick> {
 	private byte[] layerVolumes;
 	private int modCount = 0;
 	private short marker = 0;
+	private IInstrument[] instruments = new IInstrument[9];
 
 	public NBSSong(short layers) {
 		this.layers = layers;
@@ -218,5 +220,13 @@ public final class NBSSong implements Iterable<NBSTick> {
 			}
 
 		};
+	}
+
+	public void setCustomInstrument(byte id, IInstrument instrument) {
+		instruments[id] = instrument;
+	}
+
+	public IInstrument getCustomInstrument(byte id) {
+		return instruments[id];
 	}
 }
