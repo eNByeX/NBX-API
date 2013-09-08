@@ -87,7 +87,7 @@ public class NBSOutputStream extends LittleEndianDataOutputStream {
 			IInstrument inst = song.getCustomInstrument(x);
 			if (inst != null && inst instanceof NBSInstrument) {
 				insts.add((NBSInstrument) inst);
-			} else {
+			} else if (inst != null) {
 				insts.add(new NBSInstrument(inst.getName(), "", (byte) 45,
 						false));
 			}
