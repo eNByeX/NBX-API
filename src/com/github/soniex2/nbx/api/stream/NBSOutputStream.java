@@ -2,9 +2,12 @@ package com.github.soniex2.nbx.api.stream;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 
+import com.github.soniex2.nbx.api.IInstrument;
 import com.github.soniex2.nbx.api.nbs.NBSBlock;
 import com.github.soniex2.nbx.api.nbs.NBSHeader;
+import com.github.soniex2.nbx.api.nbs.NBSInstrument;
 import com.github.soniex2.nbx.api.nbs.NBSSong;
 import com.github.soniex2.nbx.api.nbs.NBSTick;
 
@@ -16,8 +19,11 @@ public class NBSOutputStream extends LittleEndianDataOutputStream {
 
 	/**
 	 * Writes a header to the stream.
-	 * @param header the header.
-	 * @throws IOException if an I/O error occurs.
+	 * 
+	 * @param header
+	 *            the header.
+	 * @throws IOException
+	 *             if an I/O error occurs.
 	 */
 	public void writeHeader(NBSHeader header) throws IOException {
 		writeShort(header.getTicks());
@@ -27,7 +33,7 @@ public class NBSOutputStream extends LittleEndianDataOutputStream {
 		writeASCII(header.getOriginalAuthor());
 		writeASCII(header.getDescription());
 		writeShort(header.getTempo());
-		write(header.shouldAutosave() ? 1 : 0);
+		writeBoolean(header.shouldAutosave());
 		write(header.getAutosaveTime());
 		write(header.getTimeSig());
 		writeInt(header.getMinutes());
@@ -40,8 +46,11 @@ public class NBSOutputStream extends LittleEndianDataOutputStream {
 
 	/**
 	 * Writes a song to the stream.
-	 * @param song the song.
-	 * @throws IOException if an I/O error occurs.
+	 * 
+	 * @param song
+	 *            the song.
+	 * @throws IOException
+	 *             if an I/O error occurs.
 	 */
 	public void writeSong(NBSSong song) throws IOException {
 		short songTicks = song.getTicks();
@@ -73,6 +82,23 @@ public class NBSOutputStream extends LittleEndianDataOutputStream {
 				writeASCII(String.valueOf(song.getLayerName(x)));
 			write(song.getLayerVolume(x));
 		}
-		write(0);
+		ArrayList<NBSInstrument> insts = new ArrayList<NBSInstrument>();
+		for (byte x = 0; x < 9; x++) {
+			IInstrument inst = song.getCustomInstrument(x);
+			if (inst != null && inst instanceof NBSInstrument) {
+				insts.add((NBSInstrument) inst);
+			} else {
+				insts.add(new NBSInstrument(inst.getName(), "", (byte) 45,
+						false));
+			}
+		}
+		write(insts.size());
+		for (byte x = 0; x < insts.size(); x++) {
+			NBSInstrument inst = insts.get(x);
+			writeASCII(inst.getName());
+			writeASCII(inst.getLocation());
+			writeByte(inst.getPitch());
+			writeBoolean(inst.getPress());
+		}
 	}
 }
