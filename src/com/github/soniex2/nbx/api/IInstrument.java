@@ -4,4 +4,6 @@ public interface IInstrument {
 
 	String getName();
 
+	IInstrument copy();
+
 }

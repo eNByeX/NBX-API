@@ -79,11 +79,10 @@ public class NBSInputStream extends LittleEndianDataInputStream {
 			return song.copy();
 		}
 		for (byte i = 0; i < a; i++) {
-			// TODO add custom instrument support
 			String name = readASCII();
 			String file = readASCII();
 			byte pitch = readByte();
-			boolean play = readByte() == 1;
+			boolean play = readBoolean();
 			NBSInstrument inst = new NBSInstrument(name, file, pitch, play);
 			song.setCustomInstrument(i,inst);
 		}

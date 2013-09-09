@@ -179,6 +179,10 @@ public final class NBSSong implements Iterable<NBSTick> {
 		for (x = 0; x < layerVolumes.length; x++) {
 			newSong.layerVolumes[x] = layerVolumes[x];
 		}
+		for (x = 0; x < 9; x++) {
+			newSong.instruments[x] = instruments[x] != null ? instruments[x]
+					.copy() : null;
+		}
 		return newSong;
 	}
 

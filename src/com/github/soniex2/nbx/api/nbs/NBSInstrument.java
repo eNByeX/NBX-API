@@ -68,4 +68,8 @@ public class NBSInstrument implements IInstrument {
 	public boolean getPress() {
 		return press;
 	}
+
+	public IInstrument copy() {
+		return new NBSInstrument(name, location, pitch, press);
+	}
 }
