@@ -1,5 +1,10 @@
 package com.github.soniex2.nbx.api.nbs;
 
+import com.github.soniex2.nbx.api.stream.nbs.INBSReader;
+import com.github.soniex2.nbx.api.stream.nbs.INBSWriter;
+
+import java.io.IOException;
+
 public class NBSHeader {
 
     private short ticks = 0;
@@ -178,6 +183,32 @@ public class NBSHeader {
         return new NBSHeader(ticks, layers, name, author, originalAuthor,
                 description, tempo, autosave, autosaveTime, timeSig, minutes,
                 lclicks, rclicks, blockAdds, blockBreaks, importName);
+    }
+
+    public static NBSHeader read(INBSReader reader) throws IOException {
+        return new NBSHeader(reader.readShort(), reader.readShort(), reader.readASCII(),
+                reader.readASCII(), reader.readASCII(), reader.readASCII(), reader.readShort(),
+                reader.readBoolean(), reader.readByte(), reader.readByte(), reader.readInt(), reader.readInt(),
+                reader.readInt(), reader.readInt(), reader.readInt(), reader.readASCII());
+    }
+
+    public void write(INBSWriter writer) throws IOException {
+        writer.writeShort(ticks);
+        writer.writeShort(layers);
+        writer.writeASCII(name);
+        writer.writeASCII(author);
+        writer.writeASCII(originalAuthor);
+        writer.writeASCII(description);
+        writer.writeShort(tempo);
+        writer.writeBoolean(autosave);
+        writer.write(autosaveTime);
+        writer.write(timeSig);
+        writer.writeInt(minutes);
+        writer.writeInt(lclicks);
+        writer.writeInt(rclicks);
+        writer.writeInt(blockAdds);
+        writer.writeInt(blockBreaks);
+        writer.writeASCII(importName);
     }
 
 }
