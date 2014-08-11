@@ -46,3 +46,7 @@ Desktop.ini
 *.ipr
 *.iml
 *.iws
+
+# Gradle
+.gradle/
+build/
