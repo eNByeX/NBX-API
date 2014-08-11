@@ -20,7 +20,7 @@ public class NBXInputStream extends LittleEndianDataInputStream implements INBXR
         if (in.read(b) < FILE_HEADER.length) {
             throw new IOException(); // whatever
         }
-        for (int i = 1; i < FILE_HEADER.length; i++) {
+        for (int i = 0; i < FILE_HEADER.length; i++) {
             if (b[i] != FILE_HEADER[i]) {
                 throw new IOException();
             }
