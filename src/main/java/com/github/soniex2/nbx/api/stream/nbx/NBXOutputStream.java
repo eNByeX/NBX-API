@@ -1,6 +1,6 @@
 package com.github.soniex2.nbx.api.stream.nbx;
 
-import com.github.soniex2.nbx.api.INBXChunk;
+import com.github.soniex2.nbx.api.nbx.chunk.INBXChunk;
 import com.github.soniex2.nbx.api.stream.LittleEndianDataOutputStream;
 
 import java.io.IOException;

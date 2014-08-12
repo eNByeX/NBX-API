@@ -1,6 +1,7 @@
 package com.github.soniex2.nbx.api.stream.nbx;
 
-import com.github.soniex2.nbx.api.INBXChunk;
+import com.github.soniex2.nbx.api.nbx.chunk.INBXChunk;
+import com.github.soniex2.nbx.api.nbx.chunk.SimpleNBXChunk;
 import com.github.soniex2.nbx.api.stream.LittleEndianDataInputStream;
 
 import java.io.IOException;
@@ -33,31 +34,18 @@ public class NBXInputStream extends LittleEndianDataInputStream implements INBXR
         if (read(idBytes) < 4) {
             throw new IOException();
         }
-        final String _id = new String(idBytes, "US-ASCII");
-        final byte[] _data = new byte[dataLen];
-        if (read(_data) < dataLen) {
+        final String id = new String(idBytes, "US-ASCII");
+        final byte[] data = new byte[dataLen];
+        if (read(data) < dataLen) {
             throw new IOException();
         }
         CRC32 crc = new CRC32();
         crc.update(idBytes);
-        crc.update(_data);
+        crc.update(data);
         if ((int) (crc.getValue() & 0xFFFFFFFFL) != readInt()) {
             throw new IOException();
         }
 
-        return new INBXChunk() {
-            private String id = _id;
-            private byte[] data = _data;
-
-            @Override
-            public String getId() {
-                return id;
-            }
-
-            @Override
-            public byte[] getData() {
-                return data;
-            }
-        };
+        return new SimpleNBXChunk(id, data);
     }
 }
