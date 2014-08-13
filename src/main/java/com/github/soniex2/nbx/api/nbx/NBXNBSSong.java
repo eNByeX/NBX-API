@@ -1,5 +1,6 @@
 package com.github.soniex2.nbx.api.nbx;
 
+import com.github.soniex2.nbx.api.nbx.chunk.IChunkable;
 import com.github.soniex2.nbx.api.nbs.NBSSong;
 import com.github.soniex2.nbx.api.nbx.chunk.INBXChunk;
 import com.github.soniex2.nbx.api.nbx.chunk.SimpleNBXChunk;
@@ -15,21 +16,17 @@ import static com.github.soniex2.nbx.api.nbs.NBSSong.WriteLevel;
 /**
  * @author soniex2
  */
-public class NBXSong {
+public class NBXNBSSong implements IChunkable, INBXChunk {
     public NBSSong song;
 
-    public NBXSong(NBSSong song) {
-        this.song = song;
-    }
-
-    public static NBXSong fromChunk(INBXChunk chunk) {
+    @Override
+    public void fromChunk(INBXChunk chunk) {
         if (!chunk.getId().equals("SNBS")) throw new IllegalArgumentException();
         try {
             ByteArrayInputStream bais = new ByteArrayInputStream(chunk.getData());
             NBSInputStream nbsInputStream = new NBSInputStream(bais);
-            NBSSong song = NBSSong.read(nbsInputStream);
+            song = NBSSong.read(nbsInputStream);
             nbsInputStream.close();
-            return new NBXSong(song);
         } catch (IOException e) {
             // This shouldn't happen
             throw new RuntimeException(e);
@@ -49,7 +46,18 @@ public class NBXSong {
         }
     }
 
+    @Override
     public INBXChunk toChunk() {
         return toChunk(WriteLevel.INSTRUMENTS);
+    }
+
+    @Override
+    public String getId() {
+        return "SNBS";
+    }
+
+    @Override
+    public byte[] getData() {
+        return toChunk().getData();
     }
 }
