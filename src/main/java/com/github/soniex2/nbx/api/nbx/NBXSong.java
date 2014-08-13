@@ -23,7 +23,7 @@ public class NBXSong {
     }
 
     public static NBXSong fromChunk(INBXChunk chunk) {
-        if (!chunk.getId().equals("SDAT")) throw new IllegalArgumentException();
+        if (!chunk.getId().equals("SNBS")) throw new IllegalArgumentException();
         try {
             ByteArrayInputStream bais = new ByteArrayInputStream(chunk.getData());
             NBSInputStream nbsInputStream = new NBSInputStream(bais);
@@ -42,7 +42,7 @@ public class NBXSong {
             NBSOutputStream nbsOutputStream = new NBSOutputStream(baos);
             song.write(nbsOutputStream, level);
             nbsOutputStream.close();
-            return new SimpleNBXChunk("SDAT", baos.toByteArray());
+            return new SimpleNBXChunk("SNBS", baos.toByteArray());
         } catch (IOException e) {
             // This shouldn't happen
             throw new RuntimeException(e);
