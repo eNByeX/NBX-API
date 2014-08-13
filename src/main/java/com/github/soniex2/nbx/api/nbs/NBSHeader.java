@@ -24,30 +24,24 @@ public class NBSHeader {
     private int blockBreaks = 0;
     private String importName = "";
 
-    public NBSHeader() {
-    }
-
-    public NBSHeader(short ticks, short layers, String name, String author,
-                     String originalAuthor, String description, short tempo,
-                     boolean autosave, byte autosaveTime, byte timeSig, int minutes,
-                     int lclicks, int rclicks, int blockAdds, int blockBreaks,
-                     String importName) {
-        this.ticks = ticks;
-        this.layers = layers;
-        this.name = name;
-        this.author = author;
-        this.originalAuthor = originalAuthor;
-        this.description = description;
-        this.tempo = tempo;
-        this.autosave = autosave;
-        this.autosaveTime = autosaveTime;
-        this.timeSig = timeSig;
-        this.minutes = minutes;
-        this.lclicks = lclicks;
-        this.rclicks = rclicks;
-        this.blockAdds = blockAdds;
-        this.blockBreaks = blockBreaks;
-        this.importName = importName;
+    public static NBSHeader read(INBSReader reader) throws IOException {
+        NBSHeader header = new NBSHeader();
+        header.setTicks(reader.readShort());
+        header.setLayers(reader.readShort());
+        header.setName(reader.readASCII());
+        header.setAuthor(reader.readASCII());
+        header.setOriginalAuthor(reader.readASCII());
+        header.setDescription(reader.readASCII());
+        header.setTempo(reader.readShort());
+        header.setAutosave(reader.readBoolean(), reader.readByte());
+        header.setTimeSig(reader.readByte());
+        header.setMinutes(reader.readInt());
+        header.setLClicks(reader.readInt());
+        header.setRClicks(reader.readInt());
+        header.setBlockAdds(reader.readInt());
+        header.setBlockBreaks(reader.readInt());
+        header.setImportName(reader.readASCII());
+        return header;
     }
 
     public short getTicks() {
@@ -180,16 +174,23 @@ public class NBSHeader {
     }
 
     public NBSHeader copy() {
-        return new NBSHeader(ticks, layers, name, author, originalAuthor,
-                description, tempo, autosave, autosaveTime, timeSig, minutes,
-                lclicks, rclicks, blockAdds, blockBreaks, importName);
-    }
-
-    public static NBSHeader read(INBSReader reader) throws IOException {
-        return new NBSHeader(reader.readShort(), reader.readShort(), reader.readASCII(),
-                reader.readASCII(), reader.readASCII(), reader.readASCII(), reader.readShort(),
-                reader.readBoolean(), reader.readByte(), reader.readByte(), reader.readInt(), reader.readInt(),
-                reader.readInt(), reader.readInt(), reader.readInt(), reader.readASCII());
+        NBSHeader header = new NBSHeader();
+        header.setTicks(ticks);
+        header.setLayers(layers);
+        header.setName(name);
+        header.setAuthor(author);
+        header.setOriginalAuthor(originalAuthor);
+        header.setDescription(description);
+        header.setTempo(tempo);
+        header.setAutosave(autosave, autosaveTime);
+        header.setTimeSig(timeSig);
+        header.setMinutes(minutes);
+        header.setLClicks(lclicks);
+        header.setRClicks(rclicks);
+        header.setBlockAdds(blockAdds);
+        header.setBlockBreaks(blockBreaks);
+        header.setImportName(importName);
+        return header;
     }
 
     public void write(INBSWriter writer) throws IOException {

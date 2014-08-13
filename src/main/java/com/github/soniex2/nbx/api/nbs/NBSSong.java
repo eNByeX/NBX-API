@@ -23,6 +23,12 @@ public class NBSSong {
         this(song, header);
     }
 
+    public static NBSSong read(INBSReader reader) throws IOException {
+        NBSHeader header = NBSHeader.read(reader);
+        NBSSongData songData = NBSSongData.read(reader, header);
+        return new NBSSong(header, songData);
+    }
+
     /**
      * Returns the song length, in milliseconds.
      */
@@ -38,17 +44,16 @@ public class NBSSong {
         return header;
     }
 
-    public static NBSSong read(INBSReader reader) throws IOException {
-        NBSHeader header = NBSHeader.read(reader);
-        NBSSongData songData = NBSSongData.read(reader, header);
-        return new NBSSong(header, songData);
-    }
-
-    public void write(INBSWriter writer) throws IOException {
+    public void write(INBSWriter writer, WriteLevel level) throws IOException {
         header.setLayers(songData.getLayers());
         header.setTicks(songData.getTicks());
         header.write(writer);
-        songData.write(writer);
+        songData.write(writer, level);
     }
 
+    public enum WriteLevel {
+        SONG,
+        LAYERS,
+        INSTRUMENTS;
+    }
 }

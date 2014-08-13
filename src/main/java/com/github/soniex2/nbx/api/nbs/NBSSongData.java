@@ -4,9 +4,10 @@ import com.github.soniex2.nbx.api.IInstrument;
 import com.github.soniex2.nbx.api.stream.nbs.INBSReader;
 import com.github.soniex2.nbx.api.stream.nbs.INBSWriter;
 
-import java.io.EOFException;
 import java.io.IOException;
 import java.util.*;
+
+import static com.github.soniex2.nbx.api.nbs.NBSSong.WriteLevel;
 
 public final class NBSSongData implements Iterable<NBSTick> {
 
@@ -28,6 +29,46 @@ public final class NBSSongData implements Iterable<NBSTick> {
     public NBSSongData(short ticks, short layers) {
         this(layers);
         song.ensureCapacity(ticks);
+    }
+
+    public static NBSSongData read(INBSReader reader) throws IOException {
+        // use a dummy header, it doesn't care. (but you won't get layer info)
+        return read(reader, new NBSHeader());
+    }
+
+    public static NBSSongData read(INBSReader reader, NBSHeader header) throws IOException {
+        NBSSongData song = new NBSSongData(header.getTicks(), header.getLayers());
+        // START part 2 - song data
+        short tick = -1;
+        short jumps;
+        while (true) {
+            jumps = reader.readShort();
+            if (jumps == 0) {
+                break;
+            }
+            tick += jumps;
+            song.addTick(tick, NBSTick.read(reader, song.getLayers()));
+        }
+        // END part 2 - song data
+        try {
+            // START part 3 & 4 - optional metadata
+            // START part 3 - (optional) layer data
+            for (short i = 0; i < header.getLayers(); i++) {
+                song.setLayerName(i, reader.readASCII());
+                song.setLayerVolume(i, reader.readByte());
+            }
+            // END part 3
+            // START part 4 - (optional) custom instrument data
+            int a = reader.readByte();
+            for (byte i = 0; i < a; i++) {
+                song.setCustomInstrument(i, NBSInstrument.read(reader));
+            }
+            // END part 4
+            // END part 3 & 4
+        } catch (IOException e) {
+            //return song;
+        }
+        return song;
     }
 
     public short getTicks() {
@@ -207,65 +248,7 @@ public final class NBSSongData implements Iterable<NBSTick> {
         return instruments[id];
     }
 
-    public static NBSSongData read(INBSReader reader) throws IOException {
-        // use a dummy header, it doesn't care. (but you won't get layer info)
-        return read(reader, new NBSHeader());
-    }
-
-    public static NBSSongData read(INBSReader reader, NBSHeader header) throws IOException {
-        NBSSongData song = new NBSSongData(header.getTicks(), header.getLayers());
-        short tick = -1;
-        short jumps;
-        while (true) {
-            jumps = reader.readShort();
-            if (jumps == 0) {
-                break;
-            }
-            tick += jumps;
-            short layer = -1;
-            NBSTick t = new NBSTick(song.getLayers());
-            song.addTick(tick, t);
-            while (true) {
-                jumps = reader.readShort();
-                if (jumps == 0) {
-                    break;
-                }
-                layer += jumps;
-                byte inst = reader.readByte();
-                byte key = reader.readByte();
-                t.setNote(new NBSBlock(inst, key), layer);
-            }
-        }
-        if (header.getLayers() <= 0) {
-            return song;
-        }
-        try {
-            for (short i = 0; i < header.getLayers(); i++) {
-                song.setLayerName(i, reader.readASCII());
-                song.setLayerVolume(i, reader.readByte());
-            }
-        } catch (EOFException e) {
-            return song;
-        }
-        int a;
-        try {
-            a = reader.readByte();
-        } catch (EOFException e) {
-            return song;
-        }
-        for (byte i = 0; i < a; i++) {
-            String name = reader.readASCII();
-            String file = reader.readASCII();
-            byte pitch = reader.readByte();
-            boolean play = reader.readBoolean();
-            NBSInstrument inst = new NBSInstrument(name, file, pitch, play);
-            song.setCustomInstrument(i, inst);
-        }
-        return song;
-    }
-
-
-    public void write(INBSWriter writer) throws IOException {
+    public void write(INBSWriter writer, WriteLevel level) throws IOException {
         short songTicks = getTicks();
         short lastTick = -1;
         for (short x = 0; x < songTicks; x++) {
@@ -274,45 +257,36 @@ public final class NBSSongData implements Iterable<NBSTick> {
                 continue;
             writer.writeShort(x - lastTick);
             lastTick = x;
-            short layers = tick.getLayers();
-            short lastLayer = -1;
-            for (short y = 0; y < layers; y++) {
-                NBSBlock block = tick.getNote(y);
-                if (block == null)
-                    continue;
-                writer.writeShort(y - lastLayer);
-                writer.write(block.inst);
-                writer.write(block.note);
-                lastLayer = y;
-
-            }
-            writer.writeShort(0);
+            tick.write(writer);
         }
         writer.writeShort(0);
-        for (short x = 0; x < getLayers(); x++) {
-            if (getLayerName(x) == null)
-                writer.writeASCII("");
-            else
-                writer.writeASCII(String.valueOf(getLayerName(x)));
-            writer.write(getLayerVolume(x));
-        }
-        ArrayList<NBSInstrument> insts = new ArrayList<NBSInstrument>();
-        for (byte x = 0; x < 9; x++) {
-            IInstrument inst = getCustomInstrument(x);
-            if (inst != null && inst instanceof NBSInstrument) {
-                insts.add((NBSInstrument) inst);
-            } else if (inst != null) {
-                insts.add(new NBSInstrument(inst.getName(), "", (byte) 45,
-                        false));
+        if (level.compareTo(WriteLevel.LAYERS) >= 0) {
+            for (short x = 0; x < getLayers(); x++) {
+                if (getLayerName(x) == null)
+                    writer.writeASCII("");
+                else
+                    writer.writeASCII(String.valueOf(getLayerName(x)));
+                writer.writeByte(getLayerVolume(x));
             }
-        }
-        writer.write(insts.size());
-        for (byte x = 0; x < insts.size(); x++) {
-            NBSInstrument inst = insts.get(x);
-            writer.writeASCII(inst.getName());
-            writer.writeASCII(inst.getLocation());
-            writer.writeByte(inst.getPitch());
-            writer.writeBoolean(inst.getPress());
+            if (level.compareTo(WriteLevel.INSTRUMENTS) >= 0) {
+                byte b = 9;
+                for (byte x = 8; x >= 0; x--, b--) {
+                    if (getCustomInstrument(x) != null)
+                        break;
+                }
+                writer.writeByte(b);
+                // avoid constructing multiple objects
+                NBSInstrument dummy = new NBSInstrument("", "", (byte) 45, false);
+                for (byte x = 0; x < b; x++) {
+                    IInstrument inst = getCustomInstrument(x);
+                    if (inst != null && inst instanceof NBSInstrument) {
+                        ((NBSInstrument) inst).write(writer);
+                    } else {
+                        dummy.setName(inst.getName());
+                        dummy.write(writer);
+                    }
+                }
+            }
         }
     }
 }

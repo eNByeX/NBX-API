@@ -5,6 +5,8 @@ import java.io.*;
 public class LittleEndianDataOutputStream extends BufferedOutputStream implements
         DataOutput {
 
+    private byte[] bytearr = null;
+
     protected LittleEndianDataOutputStream(OutputStream out) {
         super(out);
     }
@@ -74,8 +76,6 @@ public class LittleEndianDataOutputStream extends BufferedOutputStream implement
             writeChar(s.charAt(i));
         }
     }
-
-    private byte[] bytearr = null;
 
     @Override
     public void writeUTF(String str) throws IOException {

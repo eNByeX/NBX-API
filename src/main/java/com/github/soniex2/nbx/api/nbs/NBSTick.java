@@ -1,5 +1,9 @@
 package com.github.soniex2.nbx.api.nbs;
 
+import com.github.soniex2.nbx.api.stream.nbs.INBSReader;
+import com.github.soniex2.nbx.api.stream.nbs.INBSWriter;
+
+import java.io.IOException;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -11,6 +15,21 @@ public final class NBSTick implements Iterable<NBSBlock> {
 
     public NBSTick(int layers) {
         notes = new NBSBlock[layers & 0x7FFF];
+    }
+
+    public static NBSTick read(INBSReader reader, int layers) throws IOException {
+        NBSTick t = new NBSTick(layers);
+        short jumps;
+        short layer = -1;
+        while (true) {
+            jumps = reader.readShort();
+            if (jumps == 0) {
+                break;
+            }
+            layer += jumps;
+            t.setNote(NBSBlock.read(reader), layer);
+        }
+        return t;
     }
 
     public short getLayers() {
@@ -68,6 +87,20 @@ public final class NBSTick implements Iterable<NBSBlock> {
             x++;
         }
         return t;
+    }
+
+    public void write(INBSWriter writer) throws IOException {
+        short layers = getLayers();
+        short lastLayer = -1;
+        for (short y = 0; y < layers; y++) {
+            NBSBlock block = getNote(y);
+            if (block == null)
+                continue;
+            writer.writeShort(y - lastLayer);
+            block.write(writer);
+            lastLayer = y;
+        }
+        writer.writeShort(0);
     }
 
     @Override

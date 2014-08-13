@@ -1,5 +1,10 @@
 package com.github.soniex2.nbx.api.nbs;
 
+import com.github.soniex2.nbx.api.stream.nbs.INBSReader;
+import com.github.soniex2.nbx.api.stream.nbs.INBSWriter;
+
+import java.io.IOException;
+
 public final class NBSBlock implements Comparable<NBSBlock> {
 
     public final int inst;
@@ -16,6 +21,12 @@ public final class NBSBlock implements Comparable<NBSBlock> {
         this.note = note & 0x7F;
     }
 
+    public static NBSBlock read(INBSReader reader) throws IOException {
+        int inst = reader.readByte();
+        int key = reader.readByte();
+        return new NBSBlock(inst, key);
+    }
+
     public String toString() {
         return inst + ":" + note;
     }
@@ -27,6 +38,11 @@ public final class NBSBlock implements Comparable<NBSBlock> {
     @Override
     public int compareTo(NBSBlock o) {
         return hashCode() - o.hashCode();
+    }
+
+    public void write(INBSWriter writer) throws IOException {
+        writer.writeByte(inst);
+        writer.writeByte(note);
     }
 
 }

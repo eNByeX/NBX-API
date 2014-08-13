@@ -1,6 +1,10 @@
 package com.github.soniex2.nbx.api.nbs;
 
 import com.github.soniex2.nbx.api.IInstrument;
+import com.github.soniex2.nbx.api.stream.nbs.INBSReader;
+import com.github.soniex2.nbx.api.stream.nbs.INBSWriter;
+
+import java.io.IOException;
 
 public class NBSInstrument implements IInstrument {
 
@@ -30,12 +34,32 @@ public class NBSInstrument implements IInstrument {
         this.press = press;
     }
 
+    public static NBSInstrument read(INBSReader reader) throws IOException {
+        String name = reader.readASCII();
+        String file = reader.readASCII();
+        byte pitch = reader.readByte();
+        boolean play = reader.readBoolean();
+        return new NBSInstrument(name, file, pitch, play);
+    }
+
+    public String getName() {
+        return name;
+    }
+
     public void setName(String name) {
         this.name = name;
     }
 
+    public String getLocation() {
+        return location;
+    }
+
     public void setLocation(String location) {
         this.location = location;
+    }
+
+    public byte getPitch() {
+        return pitch;
     }
 
     public void setPitch(byte pitch) {
@@ -45,27 +69,22 @@ public class NBSInstrument implements IInstrument {
             this.pitch = pitch;
     }
 
-    public void setPress(boolean press) {
-        this.press = press;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getLocation() {
-        return location;
-    }
-
-    public byte getPitch() {
-        return pitch;
-    }
-
     public boolean getPress() {
         return press;
     }
 
-    public IInstrument copy() {
+    public void setPress(boolean press) {
+        this.press = press;
+    }
+
+    public NBSInstrument copy() {
         return new NBSInstrument(name, location, pitch, press);
+    }
+
+    public void write(INBSWriter writer) throws IOException {
+        writer.writeASCII(getName());
+        writer.writeASCII(getLocation());
+        writer.writeByte(getPitch());
+        writer.writeBoolean(getPress());
     }
 }

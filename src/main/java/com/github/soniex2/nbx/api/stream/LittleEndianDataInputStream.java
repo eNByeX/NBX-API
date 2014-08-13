@@ -5,6 +5,10 @@ import java.io.*;
 public class LittleEndianDataInputStream extends BufferedInputStream implements
         DataInput {
 
+    private char lineBuffer[];
+    private byte bytearr[] = new byte[80];
+    private char chararr[] = new char[80];
+
     protected LittleEndianDataInputStream(InputStream in) {
         super(in);
     }
@@ -201,8 +205,6 @@ public class LittleEndianDataInputStream extends BufferedInputStream implements
         return Double.longBitsToDouble(readLong());
     }
 
-    private char lineBuffer[];
-
     /**
      * See the general contract of the <code>readLine</code> method of
      * <code>DataInput</code>.
@@ -274,9 +276,6 @@ public class LittleEndianDataInputStream extends BufferedInputStream implements
         return String.copyValueOf(buf, 0, offset);
     }
 
-    private byte bytearr[] = new byte[80];
-    private char chararr[] = new char[80];
-
     @Override
     public String readUTF() throws IOException {
         int utflen = readUnsignedShort();
@@ -316,7 +315,7 @@ public class LittleEndianDataInputStream extends BufferedInputStream implements
                     break;
                 case 12:
                 case 13:
-				/* 110x xxxx 10xx xxxx */
+                /* 110x xxxx 10xx xxxx */
                     count += 2;
                     if (count > utflen)
                         throw new UTFDataFormatException(
