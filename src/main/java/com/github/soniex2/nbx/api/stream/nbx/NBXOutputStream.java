@@ -24,7 +24,7 @@ public class NBXOutputStream extends LittleEndianDataOutputStream implements INB
      * @throws IOException if an I/O error occurs.
      */
     public void writeChunk(INBXChunk chunk) throws IOException {
-        writeChunk(chunk.getId(), chunk.getData());
+        writeChunk(chunk.getChunkId(), chunk.getChunkData());
     }
 
     /**

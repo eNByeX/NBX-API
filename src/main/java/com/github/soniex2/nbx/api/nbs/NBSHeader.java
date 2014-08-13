@@ -5,7 +5,7 @@ import com.github.soniex2.nbx.api.stream.nbs.INBSWriter;
 
 import java.io.IOException;
 
-public class NBSHeader {
+public class NBSHeader implements INBSData {
 
     private short ticks = 0;
     private short layers = 0;
@@ -24,7 +24,8 @@ public class NBSHeader {
     private int blockBreaks = 0;
     private String importName = "";
 
-    public static NBSHeader read(INBSReader reader) throws IOException {
+    @Override
+    public NBSHeader read(INBSReader reader) throws IOException {
         NBSHeader header = new NBSHeader();
         header.setTicks(reader.readShort());
         header.setLayers(reader.readShort());
@@ -193,6 +194,7 @@ public class NBSHeader {
         return header;
     }
 
+    @Override
     public void write(INBSWriter writer) throws IOException {
         writer.writeShort(ticks);
         writer.writeShort(layers);

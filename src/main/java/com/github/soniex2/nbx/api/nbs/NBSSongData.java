@@ -5,39 +5,30 @@ import com.github.soniex2.nbx.api.stream.nbs.INBSReader;
 import com.github.soniex2.nbx.api.stream.nbs.INBSWriter;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 import static com.github.soniex2.nbx.api.nbs.NBSSong.WriteLevel;
 
-public final class NBSSongData implements Iterable<NBSTick> {
+public final class NBSSongData implements Iterable<NBSTick>, INBSData {
 
     private ArrayList<NBSTick> song = new ArrayList<NBSTick>();
-    private short layers = 1;
-    private String[] layerNames;
-    private byte[] layerVolumes;
+    private short layers = 0;
+    private NBSLayer[] layerMetadata = new NBSLayer[0];
     private int modCount = 0;
     private short marker = 0;
-    private IInstrument[] instruments = new IInstrument[9];
+    private IInstrument[] customInstruments = new IInstrument[9];
 
-    public NBSSongData(short layers) {
-        this.layers = layers;
-        layerNames = new String[layers];
-        layerVolumes = new byte[layers];
-        Arrays.fill(layerVolumes, (byte) 100);
-    }
-
-    public NBSSongData(short ticks, short layers) {
-        this(layers);
-        song.ensureCapacity(ticks);
-    }
-
-    public static NBSSongData read(INBSReader reader) throws IOException {
+    @Override
+    public NBSSongData read(INBSReader reader) throws IOException {
         // use a dummy header, it doesn't care. (but you won't get layer info)
         return read(reader, new NBSHeader());
     }
 
-    public static NBSSongData read(INBSReader reader, NBSHeader header) throws IOException {
-        NBSSongData song = new NBSSongData(header.getTicks(), header.getLayers());
+    public NBSSongData read(INBSReader reader, NBSHeader header) throws IOException {
+        //NBSSongData song = new NBSSongData(header.getTicks(), header.getLayers());
         // START part 2 - song data
         short tick = -1;
         short jumps;
@@ -47,28 +38,28 @@ public final class NBSSongData implements Iterable<NBSTick> {
                 break;
             }
             tick += jumps;
-            song.addTick(tick, NBSTick.read(reader, song.getLayers()));
+            addTick(tick, new NBSTick().read(reader, getLayers()));
         }
         // END part 2 - song data
         try {
             // START part 3 & 4 - optional metadata
             // START part 3 - (optional) layer data
             for (short i = 0; i < header.getLayers(); i++) {
-                song.setLayerName(i, reader.readASCII());
-                song.setLayerVolume(i, reader.readByte());
+                setLayerName(i, reader.readASCII());
+                setLayerVolume(i, reader.readByte());
             }
             // END part 3
             // START part 4 - (optional) custom instrument data
             int a = reader.readByte();
             for (byte i = 0; i < a; i++) {
-                song.setCustomInstrument(i, NBSInstrument.read(reader));
+                setCustomInstrument(i, new NBSInstrument().read(reader));
             }
             // END part 4
             // END part 3 & 4
         } catch (IOException e) {
             //return song;
         }
-        return song;
+        return this;
     }
 
     public short getTicks() {
@@ -106,7 +97,9 @@ public final class NBSSongData implements Iterable<NBSTick> {
             throw new IllegalStateException("Too many ticks!");
         }
         while (index > song.size()) {
-            song.add(new NBSTick(layers));
+            NBSTick newTick = new NBSTick();
+            newTick.resize(layers);
+            song.add(newTick);
         }
         song.add(index, tick);
         modCount++;
@@ -118,27 +111,19 @@ public final class NBSSongData implements Iterable<NBSTick> {
     }
 
     public void resize(short layers) {
-        if (layers < 1) {
-            throw new IllegalArgumentException(
-                    "Tick must have at least one layer");
-        }
         if (layers == this.layers)
             return;
         Iterator<NBSTick> iterator = song.iterator();
         while (iterator.hasNext()) {
             iterator.next().resize(layers);
         }
-        String[] newLayerNames = new String[layers];
-        System.arraycopy(layerNames, 0, newLayerNames, 0,
-                layers < layerNames.length ? layers : layerNames.length);
-        layerNames = newLayerNames;
-        byte[] newLayerVolumes = new byte[layers];
-        System.arraycopy(layerVolumes, 0, newLayerVolumes, 0,
-                layers < layerVolumes.length ? layers : layerVolumes.length);
-        for (int x = layerVolumes.length; x < newLayerVolumes.length; x++) {
-            newLayerVolumes[x] = 100;
+        NBSLayer[] newLayerMetadata = new NBSLayer[layers];
+        System.arraycopy(layerMetadata, 0, newLayerMetadata, 0,
+                layers < layerMetadata.length ? layers : layerMetadata.length);
+        for (int x = layerMetadata.length; x < newLayerMetadata.length; x++) {
+            newLayerMetadata[x] = new NBSLayer();
         }
-        layerVolumes = newLayerVolumes;
+        layerMetadata = newLayerMetadata;
         modCount++;
         this.layers = layers;
     }
@@ -152,22 +137,19 @@ public final class NBSSongData implements Iterable<NBSTick> {
     }
 
     public String getLayerName(short layer) {
-        return layerNames[layer];
+        return layerMetadata[layer].getName();
     }
 
     public byte getLayerVolume(short layer) {
-        return layerVolumes[layer];
+        return layerMetadata[layer].getVolume();
     }
 
     public void setLayerName(short layer, String name) {
-        layerNames[layer] = name;
+        layerMetadata[layer].setName(name);
     }
 
     public void setLayerVolume(short layer, byte volume) {
-        if (volume < 0 || volume > 100)
-            throw new IllegalArgumentException(
-                    "Valid range for volume is 0-100");
-        layerVolumes[layer] = volume;
+        layerMetadata[layer].setVolume(volume);
     }
 
     public void moveMarker(short tick) {
@@ -181,20 +163,19 @@ public final class NBSSongData implements Iterable<NBSTick> {
     }
 
     public NBSSongData copy() {
-        NBSSongData newSong = new NBSSongData((short) song.size(), layers);
+        NBSSongData newSong = new NBSSongData();
+        newSong.resize(layers);
+        newSong.song.ensureCapacity(song.size());
         int x = 0;
         for (NBSTick t : this) {
             newSong.addTick(x, t.copy());
             x++;
         }
-        for (x = 0; x < layerNames.length; x++) {
-            newSong.layerNames[x] = layerNames[x];
-        }
-        for (x = 0; x < layerVolumes.length; x++) {
-            newSong.layerVolumes[x] = layerVolumes[x];
+        for (x = 0; x < layerMetadata.length; x++) {
+            newSong.layerMetadata[x] = layerMetadata[x].copy();
         }
         for (x = 0; x < 9; x++) {
-            newSong.instruments[x] = instruments[x] != null ? instruments[x]
+            newSong.customInstruments[x] = customInstruments[x] != null ? customInstruments[x]
                     .copy() : null;
         }
         return newSong;
@@ -241,11 +222,16 @@ public final class NBSSongData implements Iterable<NBSTick> {
     }
 
     public void setCustomInstrument(byte id, IInstrument instrument) {
-        instruments[id] = instrument;
+        customInstruments[id] = instrument;
     }
 
     public IInstrument getCustomInstrument(byte id) {
-        return instruments[id];
+        return customInstruments[id];
+    }
+
+    @Override
+    public void write(INBSWriter writer) throws IOException {
+        write(writer, WriteLevel.INSTRUMENTS);
     }
 
     public void write(INBSWriter writer, WriteLevel level) throws IOException {
@@ -276,7 +262,7 @@ public final class NBSSongData implements Iterable<NBSTick> {
                 }
                 writer.writeByte(b);
                 // avoid constructing multiple objects
-                NBSInstrument dummy = new NBSInstrument("", "", (byte) 45, false);
+                NBSInstrument dummy = new NBSInstrument();
                 for (byte x = 0; x < b; x++) {
                     IInstrument inst = getCustomInstrument(x);
                     if (inst != null && inst instanceof NBSInstrument) {

@@ -327,7 +327,7 @@ public class LittleEndianDataInputStream extends BufferedInputStream implements
                     chararr[chararr_count++] = (char) (((c & 0x1F) << 6) | (char2 & 0x3F));
                     break;
                 case 14:
-				/* 1110 xxxx 10xx xxxx 10xx xxxx */
+                /* 1110 xxxx 10xx xxxx 10xx xxxx */
                     count += 3;
                     if (count > utflen)
                         throw new UTFDataFormatException(

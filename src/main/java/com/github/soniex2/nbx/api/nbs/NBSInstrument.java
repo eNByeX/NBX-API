@@ -6,42 +6,23 @@ import com.github.soniex2.nbx.api.stream.nbs.INBSWriter;
 
 import java.io.IOException;
 
-public class NBSInstrument implements IInstrument {
+public class NBSInstrument implements IInstrument, INBSData {
 
-    private String name;
-    private String location;
-    private byte pitch;
-    private boolean press;
+    private String name = "";
+    private String location = "";
+    private byte pitch = 45;
+    private boolean press = false;
 
-    /**
-     * Constructs a new NBSInstrument.
-     *
-     * @param name     The name of the instrument.
-     * @param location The sound file of the instrument (just the filename, not the
-     *                 path). (On MCNBS, this is relative to the Sounds directory)
-     * @param pitch    The pitch of the sound file. Just like the note blocks, this
-     *                 ranges from 0-87. Default is 45.
-     * @param press    Whether the piano should automatically press keys with this
-     *                 instrument when the marker passes them.
-     */
-    public NBSInstrument(String name, String location, byte pitch, boolean press) {
-        this.name = name;
-        this.location = location;
-        if (pitch > 87 || pitch < 0)
-            this.pitch = 45;
-        else
-            this.pitch = pitch;
-        this.press = press;
+    @Override
+    public NBSInstrument read(INBSReader reader) throws IOException {
+        setName(reader.readASCII());
+        setLocation(reader.readASCII());
+        setPitch(reader.readByte());
+        setPress(reader.readBoolean());
+        return this;
     }
 
-    public static NBSInstrument read(INBSReader reader) throws IOException {
-        String name = reader.readASCII();
-        String file = reader.readASCII();
-        byte pitch = reader.readByte();
-        boolean play = reader.readBoolean();
-        return new NBSInstrument(name, file, pitch, play);
-    }
-
+    @Override
     public String getName() {
         return name;
     }
@@ -77,10 +58,17 @@ public class NBSInstrument implements IInstrument {
         this.press = press;
     }
 
+    @Override
     public NBSInstrument copy() {
-        return new NBSInstrument(name, location, pitch, press);
+        NBSInstrument copy = new NBSInstrument();
+        copy.setName(getName());
+        copy.setLocation(getLocation());
+        copy.setPitch(getPitch());
+        copy.setPress(getPress());
+        return copy;
     }
 
+    @Override
     public void write(INBSWriter writer) throws IOException {
         writer.writeASCII(getName());
         writer.writeASCII(getLocation());

@@ -14,12 +14,12 @@ public class SimpleNBXChunk implements INBXChunk {
     }
 
     @Override
-    public String getId() {
+    public String getChunkId() {
         return id;
     }
 
     @Override
-    public byte[] getData() {
+    public byte[] getChunkData() {
         return data;
     }
 }

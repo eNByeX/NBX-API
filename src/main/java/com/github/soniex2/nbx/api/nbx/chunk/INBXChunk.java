@@ -1,7 +1,7 @@
 package com.github.soniex2.nbx.api.nbx.chunk;
 
 public interface INBXChunk {
-    public String getId();
+    public String getChunkId();
 
-    public byte[] getData();
+    public byte[] getChunkData();
 }

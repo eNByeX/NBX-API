@@ -1,6 +1,6 @@
 package com.github.soniex2.nbx.api.nbx;
 
-import com.github.soniex2.nbx.api.nbs.NBSSong;
+import com.github.soniex2.nbx.api.nbs.NBSHeader;
 import com.github.soniex2.nbx.api.nbx.chunk.IChunkable;
 import com.github.soniex2.nbx.api.nbx.chunk.INBXChunk;
 import com.github.soniex2.nbx.api.nbx.chunk.SimpleNBXChunk;
@@ -11,35 +11,20 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import static com.github.soniex2.nbx.api.nbs.NBSSong.WriteLevel;
-
 /**
  * @author soniex2
  */
-public class NBXNBSSong implements IChunkable, INBXChunk {
-    public NBSSong song;
+public class NBXNBSHeader implements IChunkable, INBXChunk {
+    public NBSHeader header;
 
     @Override
     public void fromChunk(INBXChunk chunk) {
-        if (!chunk.getChunkId().equals("SNBS")) throw new IllegalArgumentException();
+        if (!chunk.getChunkId().equals("SHDR")) throw new IllegalArgumentException();
         try {
             ByteArrayInputStream bais = new ByteArrayInputStream(chunk.getChunkData());
             NBSInputStream nbsInputStream = new NBSInputStream(bais);
-            song = new NBSSong().read(nbsInputStream);
+            header = new NBSHeader().read(nbsInputStream);
             nbsInputStream.close();
-        } catch (IOException e) {
-            // This shouldn't happen
-            throw new RuntimeException(e);
-        }
-    }
-
-    public INBXChunk toChunk(WriteLevel level) {
-        try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            NBSOutputStream nbsOutputStream = new NBSOutputStream(baos);
-            song.write(nbsOutputStream, level);
-            nbsOutputStream.close();
-            return new SimpleNBXChunk("SNBS", baos.toByteArray());
         } catch (IOException e) {
             // This shouldn't happen
             throw new RuntimeException(e);
@@ -48,12 +33,21 @@ public class NBXNBSSong implements IChunkable, INBXChunk {
 
     @Override
     public INBXChunk toChunk() {
-        return toChunk(WriteLevel.INSTRUMENTS);
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            NBSOutputStream nbsOutputStream = new NBSOutputStream(baos);
+            header.write(nbsOutputStream);
+            nbsOutputStream.close();
+            return new SimpleNBXChunk("SHDR", baos.toByteArray());
+        } catch (IOException e) {
+            // This shouldn't happen
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public String getChunkId() {
-        return "SNBS";
+        return "SHDR";
     }
 
     @Override

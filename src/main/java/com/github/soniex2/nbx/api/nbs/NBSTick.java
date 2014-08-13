@@ -8,17 +8,13 @@ import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-public final class NBSTick implements Iterable<NBSBlock> {
+public final class NBSTick implements Iterable<NBSBlock>, INBSData {
 
-    private NBSBlock[] notes;
+    private NBSBlock[] notes = new NBSBlock[0];
     private int modCount = 0;
 
-    public NBSTick(int layers) {
-        notes = new NBSBlock[layers & 0x7FFF];
-    }
-
-    public static NBSTick read(INBSReader reader, int layers) throws IOException {
-        NBSTick t = new NBSTick(layers);
+    public NBSTick read(INBSReader reader, int layers) throws IOException {
+        resize((short) (layers & 0x7FFF));
         short jumps;
         short layer = -1;
         while (true) {
@@ -27,9 +23,14 @@ public final class NBSTick implements Iterable<NBSBlock> {
                 break;
             }
             layer += jumps;
-            t.setNote(NBSBlock.read(reader), layer);
+            setNote(new NBSBlock().read(reader), layer);
         }
-        return t;
+        return this;
+    }
+
+    @Override
+    public NBSTick read(INBSReader reader) throws IOException {
+        return read(reader, 0);
     }
 
     public short getLayers() {
@@ -56,10 +57,6 @@ public final class NBSTick implements Iterable<NBSBlock> {
     }
 
     public void resize(short layers) {
-        if (layers < 1) {
-            throw new IllegalArgumentException(
-                    "Tick must have at least one layer");
-        }
         NBSBlock[] newNotes = new NBSBlock[layers];
         System.arraycopy(notes, 0, newNotes, 0, layers < notes.length ? layers
                 : notes.length);
@@ -80,7 +77,8 @@ public final class NBSTick implements Iterable<NBSBlock> {
     }
 
     public NBSTick copy() {
-        NBSTick t = new NBSTick(notes.length);
+        NBSTick t = new NBSTick();
+        t.resize((short) notes.length);
         int x = 0;
         for (NBSBlock note : this) {
             t.setNote(note, x);
@@ -89,6 +87,7 @@ public final class NBSTick implements Iterable<NBSBlock> {
         return t;
     }
 
+    @Override
     public void write(INBSWriter writer) throws IOException {
         short layers = getLayers();
         short lastLayer = -1;

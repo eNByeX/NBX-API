@@ -5,32 +5,40 @@ import com.github.soniex2.nbx.api.stream.nbs.INBSWriter;
 
 import java.io.IOException;
 
-public final class NBSBlock implements Comparable<NBSBlock> {
+public class NBSBlock implements Comparable<NBSBlock>, INBSData {
 
-    public final int inst;
-    public final int note;
+    private int inst;
+    private int note;
 
-    public NBSBlock(int instrument, int note) {
-        if (note > 87 || note < 0) {
-            throw new IllegalArgumentException("Valid range for note is 0-87");
-        } else if (instrument > 13 || instrument < 0) {
-            throw new IllegalArgumentException(
-                    "Valid range for instrument is 0-13");
-        }
-        inst = instrument & 0x7F;
-        this.note = note & 0x7F;
+    public void setInst(int inst) {
+        this.inst = inst % 14;
     }
 
-    public static NBSBlock read(INBSReader reader) throws IOException {
-        int inst = reader.readByte();
-        int key = reader.readByte();
-        return new NBSBlock(inst, key);
+    public void setNote(int note) {
+        this.note = note % 88;
     }
 
+    public int getInst() {
+        return inst;
+    }
+
+    public int getNote() {
+        return note;
+    }
+
+    @Override
+    public NBSBlock read(INBSReader reader) throws IOException {
+        inst = reader.readByte();
+        note = reader.readByte();
+        return this;
+    }
+
+    @Override
     public String toString() {
         return inst + ":" + note;
     }
 
+    @Override
     public int hashCode() {
         return (inst << 7) | note;
     }
@@ -40,9 +48,27 @@ public final class NBSBlock implements Comparable<NBSBlock> {
         return hashCode() - o.hashCode();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o instanceof NBSBlock) {
+            NBSBlock another = (NBSBlock) o;
+            return hashCode() == another.hashCode();
+        }
+        return false;
+    }
+
+    @Override
     public void write(INBSWriter writer) throws IOException {
         writer.writeByte(inst);
         writer.writeByte(note);
+    }
+
+    public NBSBlock copy() {
+        NBSBlock copy = new NBSBlock();
+        copy.setInst(inst);
+        copy.setNote(note);
+        return copy;
     }
 
 }
