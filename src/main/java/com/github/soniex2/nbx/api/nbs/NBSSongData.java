@@ -280,7 +280,7 @@ public final class NBSSongData implements Iterable<NBSTick> {
                 for (byte x = 0; x < b; x++) {
                     IInstrument inst = getCustomInstrument(x);
                     if (inst != null && inst instanceof NBSInstrument) {
-                        ((NBSInstrument) inst).write(writer);
+                        inst.write(writer);
                     } else {
                         dummy.setName(inst.getName());
                         dummy.write(writer);

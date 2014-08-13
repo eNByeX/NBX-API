@@ -36,16 +36,20 @@ public class NBXSong {
         }
     }
 
-    public INBXChunk toChunk() {
+    public INBXChunk toChunk(WriteLevel level) {
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             NBSOutputStream nbsOutputStream = new NBSOutputStream(baos);
-            song.write(nbsOutputStream, WriteLevel.INSTRUMENTS);
+            song.write(nbsOutputStream, level);
             nbsOutputStream.close();
             return new SimpleNBXChunk("SDAT", baos.toByteArray());
         } catch (IOException e) {
             // This shouldn't happen
             throw new RuntimeException(e);
         }
+    }
+
+    public INBXChunk toChunk() {
+        return toChunk(WriteLevel.INSTRUMENTS);
     }
 }
