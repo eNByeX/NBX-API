@@ -1,6 +1,7 @@
 package com.github.soniex2.nbx.api.nbx;
 
-import com.github.soniex2.nbx.api.nbs.NBSLayer;
+import com.github.soniex2.nbx.api.nbs.NBSSong;
+import com.github.soniex2.nbx.api.nbs.NBSSongData;
 import com.github.soniex2.nbx.api.nbx.chunk.IChunkable;
 import com.github.soniex2.nbx.api.nbx.chunk.INBXChunk;
 import com.github.soniex2.nbx.api.nbx.chunk.SimpleNBXChunk;
@@ -14,25 +15,41 @@ import java.io.IOException;
 /**
  * @author soniex2
  */
-public class NBXNBSLayer extends NBSLayer implements IChunkable, INBXChunk {
-    private short id;
+public class NBXNBSSongData implements IChunkable, INBXChunk {
+    public NBSSongData songData;
 
-    public NBXNBSLayer() {
+    private NBSSong.WriteLevel writeLevel = NBSSong.WriteLevel.INSTRUMENTS;
+
+    public void setDefaultWriteLevel(NBSSong.WriteLevel writeLevel) {
+        if (writeLevel == null) throw new NullPointerException();
+        this.writeLevel = writeLevel;
     }
 
-    public NBXNBSLayer(NBXNBSLayer layer) {
-        super(layer);
+    public NBSSong.WriteLevel getDefaultWriteLevel() {
+        return writeLevel;
     }
 
     @Override
     public void fromChunk(INBXChunk chunk) {
-        if (!chunk.getChunkId().equals(getChunkId())) throw new IllegalArgumentException();
+        if (!chunk.getChunkId().equals("SDAT")) throw new IllegalArgumentException();
         try {
             ByteArrayInputStream bais = new ByteArrayInputStream(chunk.getChunkData());
             NBSInputStream nbsInputStream = new NBSInputStream(bais);
-            id = nbsInputStream.readShort();
-            read(nbsInputStream);
+            songData = new NBSSongData().read(nbsInputStream);
             nbsInputStream.close();
+        } catch (IOException e) {
+            // This shouldn't happen
+            throw new RuntimeException(e);
+        }
+    }
+
+    public INBXChunk toChunk(NBSSong.WriteLevel level) {
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            NBSOutputStream nbsOutputStream = new NBSOutputStream(baos);
+            songData.write(nbsOutputStream, level);
+            nbsOutputStream.close();
+            return new SimpleNBXChunk("SDAT", baos.toByteArray());
         } catch (IOException e) {
             // This shouldn't happen
             throw new RuntimeException(e);
@@ -41,40 +58,16 @@ public class NBXNBSLayer extends NBSLayer implements IChunkable, INBXChunk {
 
     @Override
     public INBXChunk toChunk() {
-        try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            NBSOutputStream nbsOutputStream = new NBSOutputStream(baos);
-            nbsOutputStream.writeShort(id);
-            write(nbsOutputStream);
-            nbsOutputStream.close();
-            return new SimpleNBXChunk(getChunkId(), baos.toByteArray());
-        } catch (IOException e) {
-            // This shouldn't happen
-            throw new RuntimeException(e);
-        }
+        return toChunk(getDefaultWriteLevel());
     }
 
     @Override
     public String getChunkId() {
-        return "SLAY";
+        return "SDAT";
     }
 
     @Override
     public byte[] getChunkData() {
         return toChunk().getChunkData();
-    }
-
-    @Override
-    @Deprecated
-    public NBXNBSLayer copy() {
-        return new NBXNBSLayer(this);
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = (short) (id & 0x7FFF);
     }
 }

@@ -10,6 +10,14 @@ import java.io.IOException;
  */
 public class NBSLayer implements INBSData {
 
+    public NBSLayer() {
+    }
+
+    public NBSLayer(NBSLayer layer) {
+        setName(layer.getName());
+        setVolume(layer.getVolume());
+    }
+
     private String name = "";
     private byte volume = 100;
 
@@ -42,10 +50,8 @@ public class NBSLayer implements INBSData {
         writer.writeByte(volume);
     }
 
+    @Deprecated
     public NBSLayer copy() {
-        NBSLayer copy = new NBSLayer();
-        copy.setName(getName());
-        copy.setVolume(getVolume());
-        return copy;
+        return new NBSLayer(this);
     }
 }

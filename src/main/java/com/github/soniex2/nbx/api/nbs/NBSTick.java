@@ -8,7 +8,7 @@ import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-public final class NBSTick implements Iterable<NBSBlock>, INBSData {
+public class NBSTick implements Iterable<NBSBlock>, INBSData {
 
     private NBSBlock[] notes = new NBSBlock[0];
     private int modCount = 0;

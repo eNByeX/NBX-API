@@ -19,6 +19,17 @@ import static com.github.soniex2.nbx.api.nbs.NBSSong.WriteLevel;
 public class NBXNBSSong implements IChunkable, INBXChunk {
     public NBSSong song;
 
+    private NBSSong.WriteLevel writeLevel = NBSSong.WriteLevel.INSTRUMENTS;
+
+    public void setDefaultWriteLevel(NBSSong.WriteLevel writeLevel) {
+        if (writeLevel == null) throw new NullPointerException();
+        this.writeLevel = writeLevel;
+    }
+
+    public NBSSong.WriteLevel getDefaultWriteLevel() {
+        return writeLevel;
+    }
+
     @Override
     public void fromChunk(INBXChunk chunk) {
         if (!chunk.getChunkId().equals("SNBS")) throw new IllegalArgumentException();
@@ -48,7 +59,7 @@ public class NBXNBSSong implements IChunkable, INBXChunk {
 
     @Override
     public INBXChunk toChunk() {
-        return toChunk(WriteLevel.INSTRUMENTS);
+        return toChunk(getDefaultWriteLevel());
     }
 
     @Override

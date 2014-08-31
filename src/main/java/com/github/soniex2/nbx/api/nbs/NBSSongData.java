@@ -12,7 +12,7 @@ import java.util.NoSuchElementException;
 
 import static com.github.soniex2.nbx.api.nbs.NBSSong.WriteLevel;
 
-public final class NBSSongData implements Iterable<NBSTick>, INBSData {
+public class NBSSongData implements Iterable<NBSTick>, INBSData {
 
     private ArrayList<NBSTick> song = new ArrayList<NBSTick>();
     private short layers = 0;
