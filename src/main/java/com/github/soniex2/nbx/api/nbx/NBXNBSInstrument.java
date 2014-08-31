@@ -20,7 +20,7 @@ public class NBXNBSInstrument extends NBSInstrument implements IChunkable, INBXC
 
     @Override
     public void fromChunk(INBXChunk chunk) {
-        if (!chunk.getChunkId().equals("SINS")) throw new IllegalArgumentException();
+        if (!chunk.getChunkId().equals(getChunkId())) throw new IllegalArgumentException();
         try {
             ByteArrayInputStream bais = new ByteArrayInputStream(chunk.getChunkData());
             NBSInputStream nbsInputStream = new NBSInputStream(bais);
@@ -41,7 +41,7 @@ public class NBXNBSInstrument extends NBSInstrument implements IChunkable, INBXC
             nbsOutputStream.writeByte(id);
             write(nbsOutputStream);
             nbsOutputStream.close();
-            return new SimpleNBXChunk("SINS", baos.toByteArray());
+            return new SimpleNBXChunk(getChunkId(), baos.toByteArray());
         } catch (IOException e) {
             // This shouldn't happen
             throw new RuntimeException(e);

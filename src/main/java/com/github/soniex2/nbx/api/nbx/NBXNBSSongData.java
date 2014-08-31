@@ -31,7 +31,7 @@ public class NBXNBSSongData implements IChunkable, INBXChunk {
 
     @Override
     public void fromChunk(INBXChunk chunk) {
-        if (!chunk.getChunkId().equals("SDAT")) throw new IllegalArgumentException();
+        if (!chunk.getChunkId().equals(getChunkId())) throw new IllegalArgumentException();
         try {
             ByteArrayInputStream bais = new ByteArrayInputStream(chunk.getChunkData());
             NBSInputStream nbsInputStream = new NBSInputStream(bais);
@@ -49,7 +49,7 @@ public class NBXNBSSongData implements IChunkable, INBXChunk {
             NBSOutputStream nbsOutputStream = new NBSOutputStream(baos);
             songData.write(nbsOutputStream, level);
             nbsOutputStream.close();
-            return new SimpleNBXChunk("SDAT", baos.toByteArray());
+            return new SimpleNBXChunk(getChunkId(), baos.toByteArray());
         } catch (IOException e) {
             // This shouldn't happen
             throw new RuntimeException(e);

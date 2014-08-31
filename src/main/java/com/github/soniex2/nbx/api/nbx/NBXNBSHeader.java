@@ -19,7 +19,7 @@ public class NBXNBSHeader implements IChunkable, INBXChunk {
 
     @Override
     public void fromChunk(INBXChunk chunk) {
-        if (!chunk.getChunkId().equals("SHDR")) throw new IllegalArgumentException();
+        if (!chunk.getChunkId().equals(getChunkId())) throw new IllegalArgumentException();
         try {
             ByteArrayInputStream bais = new ByteArrayInputStream(chunk.getChunkData());
             NBSInputStream nbsInputStream = new NBSInputStream(bais);
@@ -38,7 +38,7 @@ public class NBXNBSHeader implements IChunkable, INBXChunk {
             NBSOutputStream nbsOutputStream = new NBSOutputStream(baos);
             header.write(nbsOutputStream);
             nbsOutputStream.close();
-            return new SimpleNBXChunk("SHDR", baos.toByteArray());
+            return new SimpleNBXChunk(getChunkId(), baos.toByteArray());
         } catch (IOException e) {
             // This shouldn't happen
             throw new RuntimeException(e);
