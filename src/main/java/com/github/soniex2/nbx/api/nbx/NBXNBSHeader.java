@@ -14,8 +14,14 @@ import java.io.IOException;
 /**
  * @author soniex2
  */
-public class NBXNBSHeader implements IChunkable, INBXChunk {
-    public NBSHeader header;
+public class NBXNBSHeader extends NBSHeader implements IChunkable, INBXChunk {
+
+    public NBXNBSHeader() {
+    }
+
+    public NBXNBSHeader(NBSHeader header) {
+        super(header);
+    }
 
     @Override
     public void fromChunk(INBXChunk chunk) {
@@ -23,7 +29,7 @@ public class NBXNBSHeader implements IChunkable, INBXChunk {
         try {
             ByteArrayInputStream bais = new ByteArrayInputStream(chunk.getChunkData());
             NBSInputStream nbsInputStream = new NBSInputStream(bais);
-            header = new NBSHeader().read(nbsInputStream);
+            read(nbsInputStream);
             nbsInputStream.close();
         } catch (IOException e) {
             // This shouldn't happen
@@ -36,7 +42,7 @@ public class NBXNBSHeader implements IChunkable, INBXChunk {
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             NBSOutputStream nbsOutputStream = new NBSOutputStream(baos);
-            header.write(nbsOutputStream);
+            write(nbsOutputStream);
             nbsOutputStream.close();
             return new SimpleNBXChunk(getChunkId(), baos.toByteArray());
         } catch (IOException e) {
@@ -53,5 +59,11 @@ public class NBXNBSHeader implements IChunkable, INBXChunk {
     @Override
     public byte[] getChunkData() {
         return toChunk().getChunkData();
+    }
+
+    @Override
+    @Deprecated
+    public NBXNBSHeader copy() {
+        return new NBXNBSHeader(this);
     }
 }

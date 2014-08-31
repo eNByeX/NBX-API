@@ -20,7 +20,7 @@ public class NBXNBSLayer extends NBSLayer implements IChunkable, INBXChunk {
     public NBXNBSLayer() {
     }
 
-    public NBXNBSLayer(NBXNBSLayer layer) {
+    public NBXNBSLayer(NBSLayer layer) {
         super(layer);
     }
 

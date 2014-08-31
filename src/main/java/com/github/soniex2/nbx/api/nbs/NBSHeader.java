@@ -24,6 +24,27 @@ public class NBSHeader implements INBSData {
     private int blockBreaks = 0;
     private String importName = "";
 
+    public NBSHeader() {
+    }
+
+    public NBSHeader(NBSHeader header) {
+        setTicks(header.getTicks());
+        setLayers(header.getLayers());
+        setName(header.getName());
+        setAuthor(header.getAuthor());
+        setOriginalAuthor(header.getOriginalAuthor());
+        setDescription(header.getDescription());
+        setTempo(header.getTempo());
+        setAutosave(header.shouldAutosave(), header.getAutosaveTime());
+        setTimeSig(header.getTimeSig());
+        setMinutes(header.getMinutes());
+        setLClicks(header.getLClicks());
+        setRClicks(header.getRClicks());
+        setBlockAdds(header.getBlockAdds());
+        setBlockBreaks(header.getBlockBreaks());
+        setImportName(header.getImportName());
+    }
+
     @Override
     public NBSHeader read(INBSReader reader) throws IOException {
         NBSHeader header = new NBSHeader();
@@ -174,24 +195,9 @@ public class NBSHeader implements INBSData {
         this.importName = importName;
     }
 
+    @Deprecated
     public NBSHeader copy() {
-        NBSHeader header = new NBSHeader();
-        header.setTicks(ticks);
-        header.setLayers(layers);
-        header.setName(name);
-        header.setAuthor(author);
-        header.setOriginalAuthor(originalAuthor);
-        header.setDescription(description);
-        header.setTempo(tempo);
-        header.setAutosave(autosave, autosaveTime);
-        header.setTimeSig(timeSig);
-        header.setMinutes(minutes);
-        header.setLClicks(lclicks);
-        header.setRClicks(rclicks);
-        header.setBlockAdds(blockAdds);
-        header.setBlockBreaks(blockBreaks);
-        header.setImportName(importName);
-        return header;
+        return new NBSHeader(this);
     }
 
     @Override
