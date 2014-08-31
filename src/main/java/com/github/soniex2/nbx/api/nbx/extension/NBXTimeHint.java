@@ -2,6 +2,7 @@ package com.github.soniex2.nbx.api.nbx.extension;
 
 import com.github.soniex2.nbx.api.nbx.chunk.IChunkable;
 import com.github.soniex2.nbx.api.nbx.chunk.INBXChunk;
+import com.github.soniex2.nbx.api.nbx.chunk.SimpleNBXChunk;
 
 /**
  * @author soniex2
@@ -15,7 +16,7 @@ public class NBXTimeHint implements IChunkable, INBXChunk {
 
     @Override
     public INBXChunk toChunk() {
-        return null;
+        return new SimpleNBXChunk(getChunkId(), getChunkData());
     }
 
     @Override

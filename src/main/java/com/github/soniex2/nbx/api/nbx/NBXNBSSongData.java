@@ -44,16 +44,7 @@ public class NBXNBSSongData implements IChunkable, INBXChunk {
     }
 
     public INBXChunk toChunk(NBSSong.WriteLevel level) {
-        try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            NBSOutputStream nbsOutputStream = new NBSOutputStream(baos);
-            songData.write(nbsOutputStream, level);
-            nbsOutputStream.close();
-            return new SimpleNBXChunk(getChunkId(), baos.toByteArray());
-        } catch (IOException e) {
-            // This shouldn't happen
-            throw new RuntimeException(e);
-        }
+        return new SimpleNBXChunk(getChunkId(), getChunkData(level));
     }
 
     @Override
@@ -68,6 +59,19 @@ public class NBXNBSSongData implements IChunkable, INBXChunk {
 
     @Override
     public byte[] getChunkData() {
-        return toChunk().getChunkData();
+        return getChunkData(getDefaultWriteLevel());
+    }
+
+    public byte[] getChunkData(NBSSong.WriteLevel level) {
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            NBSOutputStream nbsOutputStream = new NBSOutputStream(baos);
+            songData.write(nbsOutputStream, level);
+            nbsOutputStream.close();
+            return baos.toByteArray();
+        } catch (IOException e) {
+            // This shouldn't happen
+            throw new RuntimeException(e);
+        }
     }
 }

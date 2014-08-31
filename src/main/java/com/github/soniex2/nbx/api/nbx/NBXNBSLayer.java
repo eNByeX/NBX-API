@@ -41,17 +41,7 @@ public class NBXNBSLayer extends NBSLayer implements IChunkable, INBXChunk {
 
     @Override
     public INBXChunk toChunk() {
-        try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            NBSOutputStream nbsOutputStream = new NBSOutputStream(baos);
-            nbsOutputStream.writeShort(id);
-            write(nbsOutputStream);
-            nbsOutputStream.close();
-            return new SimpleNBXChunk(getChunkId(), baos.toByteArray());
-        } catch (IOException e) {
-            // This shouldn't happen
-            throw new RuntimeException(e);
-        }
+        return new SimpleNBXChunk(getChunkId(), getChunkData());
     }
 
     @Override
@@ -61,7 +51,17 @@ public class NBXNBSLayer extends NBSLayer implements IChunkable, INBXChunk {
 
     @Override
     public byte[] getChunkData() {
-        return toChunk().getChunkData();
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            NBSOutputStream nbsOutputStream = new NBSOutputStream(baos);
+            nbsOutputStream.writeShort(id);
+            write(nbsOutputStream);
+            nbsOutputStream.close();
+            return baos.toByteArray();
+        } catch (IOException e) {
+            // This shouldn't happen
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
