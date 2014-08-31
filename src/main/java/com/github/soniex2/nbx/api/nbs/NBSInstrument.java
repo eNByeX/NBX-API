@@ -13,6 +13,16 @@ public class NBSInstrument implements IInstrument, INBSData {
     private byte pitch = 45;
     private boolean press = false;
 
+    public NBSInstrument() {
+    }
+
+    public NBSInstrument(NBSInstrument instrument) {
+        setName(instrument.getName());
+        setLocation(instrument.getLocation());
+        setPress(instrument.getPress());
+        setPitch(instrument.getPitch());
+    }
+
     @Override
     public NBSInstrument read(INBSReader reader) throws IOException {
         setName(reader.readASCII());
@@ -60,12 +70,7 @@ public class NBSInstrument implements IInstrument, INBSData {
 
     @Override
     public NBSInstrument copy() {
-        NBSInstrument copy = new NBSInstrument();
-        copy.setName(getName());
-        copy.setLocation(getLocation());
-        copy.setPitch(getPitch());
-        copy.setPress(getPress());
-        return copy;
+        return new NBSInstrument(this);
     }
 
     @Override
