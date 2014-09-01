@@ -9,6 +9,16 @@ import com.github.soniex2.nbx.api.nbx.chunk.SimpleNBXChunk;
  */
 // TODO
 public class NBXTimeHint implements IChunkable, INBXChunk {
+    /*
+    So like do we want this to go like:
+    [nextTick][nextNote][startOffset][nextNote][startOffset][0][nextTick][nextNote][startOffset][0][0]
+    [nextTick][nextNote][duration][nextNote][duration][0][nextTick][nextNote][duration][0][0]
+    OR do we want:
+    [nextTick][nextNote][startOffset][duration][0][0]
+
+    I think the former would be more flexible, but it uses more space...
+     */
+    
     @Override
     public void fromChunk(INBXChunk chunk) {
 
