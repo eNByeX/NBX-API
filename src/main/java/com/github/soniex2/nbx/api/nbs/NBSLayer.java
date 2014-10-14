@@ -1,5 +1,6 @@
 package com.github.soniex2.nbx.api.nbs;
 
+import com.github.soniex2.nbx.api.helper.INBSData;
 import com.github.soniex2.nbx.api.stream.nbs.INBSReader;
 import com.github.soniex2.nbx.api.stream.nbs.INBSWriter;
 
@@ -10,6 +11,9 @@ import java.io.IOException;
  */
 public class NBSLayer implements INBSData {
 
+    private String name = "";
+    private byte volume = 100;
+
     public NBSLayer() {
     }
 
@@ -18,30 +22,26 @@ public class NBSLayer implements INBSData {
         setVolume(layer.getVolume());
     }
 
-    private String name = "";
-    private byte volume = 100;
-
-    public void setName(String name) {
-        this.name = name;
+    public byte getVolume() {
+        return volume;
     }
 
     public void setVolume(byte volume) {
         this.volume = (byte) (volume % 101);
     }
 
-    public byte getVolume() {
-        return volume;
-    }
-
     public String getName() {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     @Override
-    public NBSLayer read(INBSReader reader) throws IOException {
+    public void read(INBSReader reader) throws IOException {
         name = reader.readASCII();
         volume = (byte) (reader.readByte() % 101);
-        return this;
     }
 
     @Override
@@ -50,7 +50,7 @@ public class NBSLayer implements INBSData {
         writer.writeByte(volume);
     }
 
-    @Deprecated
+    // this isn't deprecated because subclasses might add extra data
     public NBSLayer copy() {
         return new NBSLayer(this);
     }

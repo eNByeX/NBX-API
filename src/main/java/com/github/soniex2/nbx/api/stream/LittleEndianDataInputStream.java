@@ -341,7 +341,7 @@ public class LittleEndianDataInputStream extends BufferedInputStream implements
                             | ((char2 & 0x3F) << 6) | ((char3 & 0x3F) << 0));
                     break;
                 default:
-				/* 10xx xxxx, 1111 xxxx */
+                /* 10xx xxxx, 1111 xxxx */
                     throw new UTFDataFormatException("malformed input around byte "
                             + count);
             }

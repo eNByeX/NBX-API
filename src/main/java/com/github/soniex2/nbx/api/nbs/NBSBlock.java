@@ -1,5 +1,6 @@
 package com.github.soniex2.nbx.api.nbs;
 
+import com.github.soniex2.nbx.api.helper.INBSData;
 import com.github.soniex2.nbx.api.stream.nbs.INBSReader;
 import com.github.soniex2.nbx.api.stream.nbs.INBSWriter;
 
@@ -10,27 +11,26 @@ public class NBSBlock implements Comparable<NBSBlock>, INBSData {
     private int inst;
     private int note;
 
-    public void setInst(int inst) {
-        this.inst = inst % 14;
-    }
-
-    public void setNote(int note) {
-        this.note = note % 88;
-    }
-
     public int getInst() {
         return inst;
+    }
+
+    public void setInst(int inst) {
+        this.inst = inst % 14;
     }
 
     public int getNote() {
         return note;
     }
 
+    public void setNote(int note) {
+        this.note = note % 88;
+    }
+
     @Override
-    public NBSBlock read(INBSReader reader) throws IOException {
+    public void read(INBSReader reader) throws IOException {
         inst = reader.readByte();
         note = reader.readByte();
-        return this;
     }
 
     @Override
@@ -40,7 +40,7 @@ public class NBSBlock implements Comparable<NBSBlock>, INBSData {
 
     @Override
     public int hashCode() {
-        return (inst << 7) | note;
+        return (inst << 8) | note;
     }
 
     @Override

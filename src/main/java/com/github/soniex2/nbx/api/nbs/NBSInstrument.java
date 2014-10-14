@@ -1,6 +1,7 @@
 package com.github.soniex2.nbx.api.nbs;
 
 import com.github.soniex2.nbx.api.IInstrument;
+import com.github.soniex2.nbx.api.helper.INBSData;
 import com.github.soniex2.nbx.api.stream.nbs.INBSReader;
 import com.github.soniex2.nbx.api.stream.nbs.INBSWriter;
 
@@ -24,12 +25,11 @@ public class NBSInstrument implements IInstrument, INBSData {
     }
 
     @Override
-    public NBSInstrument read(INBSReader reader) throws IOException {
+    public void read(INBSReader reader) throws IOException {
         setName(reader.readASCII());
         setLocation(reader.readASCII());
         setPitch(reader.readByte());
         setPress(reader.readBoolean());
-        return this;
     }
 
     @Override

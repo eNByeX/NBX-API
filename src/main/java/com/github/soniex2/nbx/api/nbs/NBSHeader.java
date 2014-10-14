@@ -1,5 +1,6 @@
 package com.github.soniex2.nbx.api.nbs;
 
+import com.github.soniex2.nbx.api.helper.INBSData;
 import com.github.soniex2.nbx.api.stream.nbs.INBSReader;
 import com.github.soniex2.nbx.api.stream.nbs.INBSWriter;
 
@@ -46,7 +47,7 @@ public class NBSHeader implements INBSData {
     }
 
     @Override
-    public NBSHeader read(INBSReader reader) throws IOException {
+    public void read(INBSReader reader) throws IOException {
         NBSHeader header = new NBSHeader();
         header.setTicks(reader.readShort());
         header.setLayers(reader.readShort());
@@ -63,7 +64,6 @@ public class NBSHeader implements INBSData {
         header.setBlockAdds(reader.readInt());
         header.setBlockBreaks(reader.readInt());
         header.setImportName(reader.readASCII());
-        return header;
     }
 
     public short getTicks() {
@@ -195,7 +195,6 @@ public class NBSHeader implements INBSData {
         this.importName = importName;
     }
 
-    @Deprecated
     public NBSHeader copy() {
         return new NBSHeader(this);
     }

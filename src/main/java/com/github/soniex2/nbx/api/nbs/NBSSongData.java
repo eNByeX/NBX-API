@@ -1,6 +1,7 @@
 package com.github.soniex2.nbx.api.nbs;
 
 import com.github.soniex2.nbx.api.IInstrument;
+import com.github.soniex2.nbx.api.helper.INBSData;
 import com.github.soniex2.nbx.api.stream.nbs.INBSReader;
 import com.github.soniex2.nbx.api.stream.nbs.INBSWriter;
 
@@ -22,9 +23,9 @@ public class NBSSongData implements Iterable<NBSTick>, INBSData {
     private IInstrument[] customInstruments = new IInstrument[9];
 
     @Override
-    public NBSSongData read(INBSReader reader) throws IOException {
+    public void read(INBSReader reader) throws IOException {
         // use a dummy header, it doesn't care. (but you won't get layer info)
-        return read(reader, new NBSHeader());
+        read(reader, new NBSHeader());
     }
 
     public NBSSongData read(INBSReader reader, NBSHeader header) throws IOException {
@@ -52,7 +53,9 @@ public class NBSSongData implements Iterable<NBSTick>, INBSData {
             // START part 4 - (optional) custom instrument data
             int a = reader.readByte();
             for (byte i = 0; i < a; i++) {
-                setCustomInstrument(i, new NBSInstrument().read(reader));
+                NBSInstrument temp = new NBSInstrument();
+                temp.read(reader);
+                setCustomInstrument(i, temp);
             }
             // END part 4
             // END part 3 & 4
@@ -267,7 +270,7 @@ public class NBSSongData implements Iterable<NBSTick>, INBSData {
                     IInstrument inst = getCustomInstrument(x);
                     if (inst != null && inst instanceof NBSInstrument) {
                         inst.write(writer);
-                    } else {
+                    } else if (inst != null) {
                         dummy.setName(inst.getName());
                         dummy.write(writer);
                     }

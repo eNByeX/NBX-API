@@ -1,20 +1,20 @@
 package com.github.soniex2.nbx.api.nbx;
 
+import com.github.soniex2.nbx.api.helper.ChunkHelper;
+import com.github.soniex2.nbx.api.helper.INBSData;
 import com.github.soniex2.nbx.api.nbs.NBSLayer;
 import com.github.soniex2.nbx.api.nbx.chunk.IChunkable;
 import com.github.soniex2.nbx.api.nbx.chunk.INBXChunk;
 import com.github.soniex2.nbx.api.nbx.chunk.SimpleNBXChunk;
-import com.github.soniex2.nbx.api.stream.nbs.NBSInputStream;
-import com.github.soniex2.nbx.api.stream.nbs.NBSOutputStream;
+import com.github.soniex2.nbx.api.stream.nbs.INBSReader;
+import com.github.soniex2.nbx.api.stream.nbs.INBSWriter;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 /**
  * @author soniex2
  */
-public class NBXNBSLayer extends NBSLayer implements IChunkable, INBXChunk {
+public class NBXNBSLayer extends NBSLayer implements IChunkable, INBXChunk, INBSData {
     private short id;
 
     public NBXNBSLayer() {
@@ -24,19 +24,14 @@ public class NBXNBSLayer extends NBSLayer implements IChunkable, INBXChunk {
         super(layer);
     }
 
+    public NBXNBSLayer(NBSLayer layer, short id) {
+        this(layer);
+        this.id = id;
+    }
+
     @Override
     public void fromChunk(INBXChunk chunk) {
-        if (!chunk.getChunkId().equals(getChunkId())) throw new IllegalArgumentException();
-        try {
-            ByteArrayInputStream bais = new ByteArrayInputStream(chunk.getChunkData());
-            NBSInputStream nbsInputStream = new NBSInputStream(bais);
-            id = nbsInputStream.readShort();
-            read(nbsInputStream);
-            nbsInputStream.close();
-        } catch (IOException e) {
-            // This shouldn't happen
-            throw new RuntimeException(e);
-        }
+        ChunkHelper.readFromChunk(this, chunk, getChunkId());
     }
 
     @Override
@@ -51,23 +46,12 @@ public class NBXNBSLayer extends NBSLayer implements IChunkable, INBXChunk {
 
     @Override
     public byte[] getChunkData() {
-        try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            NBSOutputStream nbsOutputStream = new NBSOutputStream(baos);
-            nbsOutputStream.writeShort(id);
-            write(nbsOutputStream);
-            nbsOutputStream.close();
-            return baos.toByteArray();
-        } catch (IOException e) {
-            // This shouldn't happen
-            throw new RuntimeException(e);
-        }
+        return ChunkHelper.writeToByteArray(this);
     }
 
     @Override
-    @Deprecated
     public NBXNBSLayer copy() {
-        return new NBXNBSLayer(this);
+        return new NBXNBSLayer(this, id);
     }
 
     public int getId() {
@@ -76,5 +60,17 @@ public class NBXNBSLayer extends NBSLayer implements IChunkable, INBXChunk {
 
     public void setId(int id) {
         this.id = (short) (id & 0x7FFF);
+    }
+
+    @Override
+    public void read(INBSReader nbsReader) throws IOException {
+        id = nbsReader.readShort();
+        super.read(nbsReader);
+    }
+
+    @Override
+    public void write(INBSWriter nbsWriter) throws IOException {
+        nbsWriter.writeShort(id);
+        super.write(nbsWriter);
     }
 }

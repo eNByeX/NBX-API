@@ -1,5 +1,6 @@
 package com.github.soniex2.nbx.api.nbs;
 
+import com.github.soniex2.nbx.api.helper.INBSData;
 import com.github.soniex2.nbx.api.stream.nbs.INBSReader;
 import com.github.soniex2.nbx.api.stream.nbs.INBSWriter;
 
@@ -23,14 +24,16 @@ public class NBSTick implements Iterable<NBSBlock>, INBSData {
                 break;
             }
             layer += jumps;
-            setNote(new NBSBlock().read(reader), layer);
+            NBSBlock temp = new NBSBlock();
+            temp.read(reader);
+            setNote(temp, layer);
         }
         return this;
     }
 
     @Override
-    public NBSTick read(INBSReader reader) throws IOException {
-        return read(reader, 0);
+    public void read(INBSReader reader) throws IOException {
+        read(reader, 0);
     }
 
     public short getLayers() {
@@ -67,8 +70,8 @@ public class NBSTick implements Iterable<NBSBlock>, INBSData {
     @Override
     public String toString() {
         String s = "[";
-        for (int x = 0; x < notes.length; x++) {
-            s += String.valueOf(notes[x]) + ", ";
+        for (NBSBlock note : notes) {
+            s += String.valueOf(note) + ", ";
         }
         if (s.length() > 2)
             s = s.substring(0, s.length() - 2);

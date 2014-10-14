@@ -1,56 +1,49 @@
 package com.github.soniex2.nbx.api.nbx;
 
 import com.github.soniex2.nbx.api.nbs.NBSSong;
-import com.github.soniex2.nbx.api.nbx.chunk.IChunkable;
+import com.github.soniex2.nbx.api.nbs.NBSSong.WriteLevel;
+import com.github.soniex2.nbx.api.nbx.chunk.AbstractChunkableChunk;
 import com.github.soniex2.nbx.api.nbx.chunk.INBXChunk;
 import com.github.soniex2.nbx.api.nbx.chunk.SimpleNBXChunk;
-import com.github.soniex2.nbx.api.stream.nbs.NBSInputStream;
+import com.github.soniex2.nbx.api.stream.nbs.INBSReader;
+import com.github.soniex2.nbx.api.stream.nbs.INBSWriter;
 import com.github.soniex2.nbx.api.stream.nbs.NBSOutputStream;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-
-import static com.github.soniex2.nbx.api.nbs.NBSSong.WriteLevel;
 
 /**
  * @author soniex2
  */
-public class NBXNBSSong implements IChunkable, INBXChunk {
+public class NBXNBSSong extends AbstractChunkableChunk {
     public NBSSong song;
 
-    private NBSSong.WriteLevel writeLevel = NBSSong.WriteLevel.INSTRUMENTS;
+    private WriteLevel writeLevel = WriteLevel.INSTRUMENTS;
 
-    public void setDefaultWriteLevel(NBSSong.WriteLevel writeLevel) {
-        if (writeLevel == null) throw new NullPointerException();
-        this.writeLevel = writeLevel;
-    }
-
-    public NBSSong.WriteLevel getDefaultWriteLevel() {
+    public WriteLevel getDefaultWriteLevel() {
         return writeLevel;
     }
 
-    @Override
-    public void fromChunk(INBXChunk chunk) {
-        if (!chunk.getChunkId().equals(getChunkId())) throw new IllegalArgumentException();
-        try {
-            ByteArrayInputStream bais = new ByteArrayInputStream(chunk.getChunkData());
-            NBSInputStream nbsInputStream = new NBSInputStream(bais);
-            song = new NBSSong().read(nbsInputStream);
-            nbsInputStream.close();
-        } catch (IOException e) {
-            // This shouldn't happen
-            throw new RuntimeException(e);
-        }
+    public void setDefaultWriteLevel(WriteLevel writeLevel) {
+        if (writeLevel == null) throw new NullPointerException();
+        this.writeLevel = writeLevel;
     }
 
     public INBXChunk toChunk(WriteLevel level) {
         return new SimpleNBXChunk(getChunkId(), getChunkData(level));
     }
 
-    @Override
-    public INBXChunk toChunk() {
-        return toChunk(getDefaultWriteLevel());
+    public byte[] getChunkData(WriteLevel level) { // can't use ChunkHelper here :/
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            NBSOutputStream nbsOutputStream = new NBSOutputStream(baos);
+            write(nbsOutputStream, level);
+            nbsOutputStream.close();
+            return baos.toByteArray();
+        } catch (IOException e) {
+            // This shouldn't happen
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -59,21 +52,19 @@ public class NBXNBSSong implements IChunkable, INBXChunk {
     }
 
     @Override
-    public byte[] getChunkData() {
-        return getChunkData(getDefaultWriteLevel());
+    public void write(INBSWriter nbsWriter) throws IOException {
+        write(nbsWriter, getDefaultWriteLevel());
     }
 
-    public byte[] getChunkData(WriteLevel level) {
-        try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            NBSOutputStream nbsOutputStream = new NBSOutputStream(baos);
-            song.write(nbsOutputStream, level);
-            nbsOutputStream.close();
-            return baos.toByteArray();
-        } catch (IOException e) {
-            // This shouldn't happen
-            throw new RuntimeException(e);
-        }
+    @Override
+    public void read(INBSReader nbsReader) throws IOException {
+        NBSSong temp = new NBSSong();
+        temp.read(nbsReader);
+        song = temp;
+    }
+
+    public void write(INBSWriter nbsWriter, WriteLevel level) throws IOException {
+        song.write(nbsWriter, level);
     }
 
 

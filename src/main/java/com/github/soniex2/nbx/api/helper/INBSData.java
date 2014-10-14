@@ -1,4 +1,4 @@
-package com.github.soniex2.nbx.api.nbs;
+package com.github.soniex2.nbx.api.helper;
 
 import com.github.soniex2.nbx.api.stream.nbs.INBSReader;
 import com.github.soniex2.nbx.api.stream.nbs.INBSWriter;
@@ -9,7 +9,7 @@ import java.io.IOException;
  * @author soniex2
  */
 public interface INBSData {
-    INBSData read(INBSReader reader) throws IOException;
+    public void read(INBSReader reader) throws IOException;
 
-    void write(INBSWriter writer) throws IOException;
+    public void write(INBSWriter writer) throws IOException;
 }

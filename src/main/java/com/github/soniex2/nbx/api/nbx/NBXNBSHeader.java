@@ -1,45 +1,23 @@
 package com.github.soniex2.nbx.api.nbx;
 
+import com.github.soniex2.nbx.api.helper.ChunkHelper;
+import com.github.soniex2.nbx.api.helper.INBSData;
 import com.github.soniex2.nbx.api.nbs.NBSHeader;
 import com.github.soniex2.nbx.api.nbx.chunk.IChunkable;
 import com.github.soniex2.nbx.api.nbx.chunk.INBXChunk;
 import com.github.soniex2.nbx.api.nbx.chunk.SimpleNBXChunk;
-import com.github.soniex2.nbx.api.stream.nbs.NBSInputStream;
-import com.github.soniex2.nbx.api.stream.nbs.NBSOutputStream;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 
 /**
  * @author soniex2
  */
-public class NBXNBSHeader extends NBSHeader implements IChunkable, INBXChunk {
+public class NBXNBSHeader extends NBSHeader implements IChunkable, INBXChunk, INBSData {
 
     public NBXNBSHeader() {
+        super();
     }
 
-    public NBXNBSHeader(NBSHeader header) {
-        super(header);
-    }
-
-    @Override
-    public void fromChunk(INBXChunk chunk) {
-        if (!chunk.getChunkId().equals(getChunkId())) throw new IllegalArgumentException();
-        try {
-            ByteArrayInputStream bais = new ByteArrayInputStream(chunk.getChunkData());
-            NBSInputStream nbsInputStream = new NBSInputStream(bais);
-            read(nbsInputStream);
-            nbsInputStream.close();
-        } catch (IOException e) {
-            // This shouldn't happen
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public INBXChunk toChunk() {
-        return new SimpleNBXChunk(getChunkId(), getChunkData());
+    public NBXNBSHeader(NBXNBSHeader nbxnbsHeader) {
+        super(nbxnbsHeader);
     }
 
     @Override
@@ -49,20 +27,20 @@ public class NBXNBSHeader extends NBSHeader implements IChunkable, INBXChunk {
 
     @Override
     public byte[] getChunkData() {
-        try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            NBSOutputStream nbsOutputStream = new NBSOutputStream(baos);
-            write(nbsOutputStream);
-            nbsOutputStream.close();
-            return baos.toByteArray();
-        } catch (IOException e) {
-            // This shouldn't happen
-            throw new RuntimeException(e);
-        }
+        return ChunkHelper.writeToByteArray(this);
     }
 
     @Override
-    @Deprecated
+    public void fromChunk(INBXChunk chunk) {
+        ChunkHelper.readFromChunk(this, chunk, getChunkId());
+    }
+
+    @Override
+    public INBXChunk toChunk() {
+        return new SimpleNBXChunk(getChunkId(), getChunkData());
+    }
+
+    @Override
     public NBXNBSHeader copy() {
         return new NBXNBSHeader(this);
     }
