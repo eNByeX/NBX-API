@@ -12,37 +12,70 @@ import java.util.ArrayList;
  */
 public class NBXLyrics extends AbstractChunkableChunk {
     /*
-    TODO basic/simple compression
+    TODO dictionary-based compression
     Lyrics have lots of repeated words and phrases, so it's pretty easy to compress them.
      */
 
-    public static final byte VERSION = 0;
-    ArrayList<String> lyrics = new ArrayList<String>();
+    public static final byte VERSION = 1;
+    private ArrayList<String> lyrics = new ArrayList<String>();
 
     @Override
     public void read(INBSReader reader) throws IOException {
         // version check
         assert reader.readByte() == VERSION : "Unknown NBXLyrics/lRCS version";
 
-        short count = reader.readShort();
-        lyrics.ensureCapacity(count + 10);
-        for (int i = 0; i < count; i++) {
-            String str = reader.readUTF();
-            lyrics.set(i, str);
+        lyrics.ensureCapacity(reader.readShort());
+
+        short count = -1;
+        short jumps;
+        while (true) {
+            jumps = reader.readShort();
+            if (jumps == 0) {
+                break;
+            }
+            count += jumps;
+            if (count < 0) {
+                throw new IllegalStateException("Too many ticks!");
+            }
+            /*while (lyrics.size() < count) {
+                lyrics.add(null);
+            }*/
+            // avoid lyrics.size() call? TODO benchmark this
+            int loop = count - lyrics.size();
+            for (int i = 0; i < loop; ++i) {
+                lyrics.add(null);
+            }
+            lyrics.add(count, reader.readUTF());
+            if (lyrics.size() > Short.MAX_VALUE) {
+                throw new IllegalStateException("Too many ticks!");
+            }
         }
     }
 
     @Override
     public void write(INBSWriter writer) throws IOException {
+        if (lyrics.size() > Short.MAX_VALUE) {
+            throw new IllegalStateException("Too many ticks!");
+        }
 
         writer.writeByte(VERSION);
 
         writer.writeShort(lyrics.size());
+
+        short count = 1;
+        writer.writeShort(count);
         for (int i = 0; i < lyrics.size(); i++) {
             String str = lyrics.get(i);
-            if (str == null) str = "";
+            if (str == null) {
+                count++;
+                continue;
+            } else if (count > 1) {
+                writer.writeShort(count);
+                count = 1;
+            }
             writer.writeUTF(str);
         }
+        writer.writeShort(0);
     }
 
     @Override
