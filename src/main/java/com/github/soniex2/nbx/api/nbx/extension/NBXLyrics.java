@@ -6,15 +6,14 @@ import com.github.soniex2.nbx.api.stream.nbs.INBSWriter;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author soniex2
  */
 public class NBXLyrics extends AbstractChunkableChunk {
-    /*
-    TODO dictionary-based compression
-    Lyrics have lots of repeated words and phrases, so it's pretty easy to compress them.
-     */
 
     public static final byte VERSION = 0;
     private ArrayList<String> lyrics = new ArrayList<String>();
@@ -23,6 +22,14 @@ public class NBXLyrics extends AbstractChunkableChunk {
     public void read(INBSReader reader) throws IOException {
         // version check
         assert reader.readByte() == VERSION : "Unknown NBXLyrics/lRCS version";
+
+        // load dictionary
+        short dictionarySize = reader.readShort();
+        ArrayList<String> dictionary = new ArrayList<String>();
+        dictionary.ensureCapacity(dictionarySize);
+        for (int i = 0; i < dictionarySize; i++) {
+            dictionary.add(reader.readUTF());
+        }
 
         lyrics.ensureCapacity(reader.readShort());
 
@@ -46,7 +53,7 @@ public class NBXLyrics extends AbstractChunkableChunk {
             for (int i = 1; i < loop; ++i) {
                 lyrics.add(null);
             }
-            lyrics.add(count, reader.readUTF());
+            lyrics.add(count, dictionary.get(reader.readShort()));
             if (lyrics.size() > Short.MAX_VALUE) {
                 throw new IllegalStateException("Too many ticks!");
             }
@@ -61,20 +68,45 @@ public class NBXLyrics extends AbstractChunkableChunk {
 
         writer.writeByte(VERSION);
 
-        writer.writeShort(lyrics.size());
+        // Build a dictionary
+        HashMap<String, Integer> simap = new HashMap<String, Integer>();
+        int last = -1;
 
-        short count = 1;
-        writer.writeShort(count);
-        for (int i = 0; i < lyrics.size(); i++) {
-            String str = lyrics.get(i);
-            if (str == null) {
-                count++;
-                continue;
-            } else if (count > 1) {
-                writer.writeShort(count);
-                count = 1;
+        for (int i = 0, lyricsSize = lyrics.size(); i < lyricsSize; i++) {
+            String s = lyrics.get(i);
+            if (s != null && !simap.containsKey(s)) {
+                simap.put(s, ++last);
             }
-            writer.writeUTF(str);
+        }
+
+        assert last <= Short.MAX_VALUE;
+
+        ArrayList<String> dictionary = new ArrayList<String>(Arrays.asList(new String[last + 1]));
+
+        for (Map.Entry<String, Integer> entry : simap.entrySet()) {
+            dictionary.set(entry.getValue(), entry.getKey());
+        }
+
+        // Serialize dictionary
+        int dictionarySize = dictionary.size();
+        writer.writeShort(dictionarySize);
+        for (int i = 0; i < dictionarySize; i++) {
+            String s = dictionary.get(i);
+            writer.writeUTF(s);
+        }
+
+        // Serialize lyrics
+        int lyricsSize = lyrics.size();
+        writer.writeShort(lyricsSize); // size hint
+
+        short lastTick = -1;
+        for (short i = 0; i < lyricsSize; i++) {
+            String str = lyrics.get(i);
+            if (str == null)
+                continue;
+            writer.writeShort(i - lastTick);
+            lastTick = i;
+            writer.writeShort(simap.get(str));
         }
         writer.writeShort(0);
     }
