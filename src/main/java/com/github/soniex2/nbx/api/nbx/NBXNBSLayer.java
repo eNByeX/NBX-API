@@ -17,6 +17,16 @@ import java.io.IOException;
 public class NBXNBSLayer extends NBSLayer implements IChunkable, INBXChunk, INBSData {
     private short id;
 
+    private byte pan;
+
+    public void setPan(byte pan) {
+        this.pan = pan;
+    }
+
+    public byte getPan() {
+        return pan;
+    }
+
     public NBXNBSLayer() {
     }
 
@@ -64,13 +74,15 @@ public class NBXNBSLayer extends NBSLayer implements IChunkable, INBXChunk, INBS
 
     @Override
     public void read(INBSReader nbsReader) throws IOException {
-        id = nbsReader.readShort();
+        setId(nbsReader.readShort());
         super.read(nbsReader);
+        setPan(nbsReader.readByte());
     }
 
     @Override
     public void write(INBSWriter nbsWriter) throws IOException {
-        nbsWriter.writeShort(id);
+        nbsWriter.writeShort(getId());
         super.write(nbsWriter);
+        nbsWriter.writeByte(getPan());
     }
 }
