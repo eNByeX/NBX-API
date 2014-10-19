@@ -16,7 +16,7 @@ public class NBXLyrics extends AbstractChunkableChunk {
     Lyrics have lots of repeated words and phrases, so it's pretty easy to compress them.
      */
 
-    public static final byte VERSION = 1;
+    public static final byte VERSION = 0;
     private ArrayList<String> lyrics = new ArrayList<String>();
 
     @Override
