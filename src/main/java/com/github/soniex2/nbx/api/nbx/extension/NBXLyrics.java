@@ -43,7 +43,7 @@ public class NBXLyrics extends AbstractChunkableChunk {
             // avoid calling lyrics.size() on every iteration? TODO benchmark this
             int loop = count - lyrics.size();
             lyrics.ensureCapacity(count); // optimize when the expected size != true size
-            for (int i = 0; i < loop; ++i) { // TODO verify loop count
+            for (int i = 1; i < loop; ++i) {
                 lyrics.add(null);
             }
             lyrics.add(count, reader.readUTF());
