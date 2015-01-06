@@ -14,7 +14,7 @@ apply plugin: 'idea'
 apply plugin: 'eclipse'
 apply plugin: 'maven'
 
-group = 'com.github.soniex2.nbx'
+group = 'com.github.enbyex.nbx'
 version = '1.0-SNAPSHOT'
 archivesBaseName = 'NBX-API'
 
